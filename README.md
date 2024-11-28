@@ -1,18 +1,10 @@
 # Chute
-A vanilla JavaScript function for pipeline style chaining methods AND functions.
-
-- V 2024-11-27:
-  - 3KB with comments
-  - < 1KB minified
-
-## How to
-- Add the function to your project
-- Call via `chute(initial_data)`
+A vanilla JavaScript function to chain functions and methods. ~2KB.
 
 ```js
 let initial_data = [1, 2, 4]
 const result = chute(initial_data,/*any functions…*/push(8))
-  //swap between function calls and method calls as needed.
+  //then swap between function and method calls as needed.
   //call any method native to the current data as normal:
   .map(double)
   //`.log` calls a built in method that takes 0+ arguments.
