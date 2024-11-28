@@ -62,27 +62,34 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 let initial_data = [1, 2, 4]
 //NOTE 1: Named the function "chute" for a clear example
   //In actual usage a single character works best: "_"
-const result = chute(initial_data,/*any functions…*/push(8))
+const result = chute(initial_data,/*any functions…*/pusher(8))
   //Chute can alternate function and method calls.
   //==== METHOD CALLS
   // Method calls native to the current data work as normal:
   .map(double)
   .filter(greater_than(4))
+  .reverse//'()' optional for methods that need no argument.
+  //(W.I.P) Basic handling of non-returning methods.
+  .push(6)
+  .forEach(x=>console.log('Some Side Effect: '+x))
   //==== FUNCTION CALLS
   //Chute provides a few ways to call functions.
   //== SUB CHAINS:
   //".and" sends data through 1+ functions.
   //".and(f1,f2)" sends data to f1, then f1's return to f2.
-  .and(push(32),push(64))
+  .and(pusher(32),pusher(64))
   //Nameless calls work the same way as ".and":
-  (push(80,128),push(256))
+  (pusher(80),pusher(128,250))
+    //but they must follow an explicitly called key:
+    //e.g. ".log(/*Blank*/)/*unnamed sub-chain->*/(f1,f2)".
   //these sub-chains use a reducer to mimic nested calls.
     //"(f1,f2)" == "f2(f1(x))"
   //strings can call methods that need no arguments:
   ('reverse')//for sequences like: ".and(f1,'method',f2)".
   //== METHOD STYLE GLOBAL FUNCTION CALLS:
   //".name_of_a_global_function" calls a global function:
-  .wrap_in_array()//no arguments == "fn(data)"
+  .wrap_in_array//'()' optional if only giving data
+  //".f()" and ".f" == "fn(data)"
   .get_index(0)//arguments == "fn(arguments)(data)"
   //PLACEHOLDERS
   //Call a function with a data argument placeholder.
@@ -97,7 +104,7 @@ const result = chute(initial_data,/*any functions…*/push(8))
   //BUILT IN METHODS
   //Chute also has "log", "tap", and "if" methods.
   //".log" calls a built in method that takes 0+ arguments.
-  .log()//".log()" logs the current data, then resumes.
+  .log//".log()" logs the current data, then resumes.
   .log('Pre-tap data')// ".log" logs arguments before data.
   //'.tap' calls a built in method that takes one function.
   //'.tap(f1)' sends the data to f1 but ignores the result.
@@ -112,8 +119,9 @@ const result = chute(initial_data,/*any functions…*/push(8))
       //(If the condition equals the boolean true.)
     sum
   )
-  .log("After if method:")
-  ()//an empty call returns the final value
+  .log()//<- the last key in chute requires an explicit call
+   //[^ Design under consideration]
+  ()//<- an empty call returns the data and ends the chute.
   //from this point, method calls directly act on the data.
   .toString()
   .replace(/$/,'!')
@@ -132,7 +140,7 @@ function placeholder_test(arg_1,the_data,arg_2){
 }
 function get_index(i){return data => data[i]}
 function wrap_in_array(data){return [data]}
-function push (...a){return l => (l.push(...a),l)}
+function pusher (...a){return l => {l.push(...a); return l}}
 function log (...x){console.log(...x);return x}
 function greater_than(n){ return x => x > n}
 function double(x){return x * 2}
