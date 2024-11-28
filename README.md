@@ -1,5 +1,5 @@
 # Chute
-A vanilla JavaScript function to chain functions and methods. ~2KB.
+Chute chains functions and native JavaScript methods. ~2KB.
 
 ```js
 let initial_data = [1, 2, 4]
