@@ -1,5 +1,5 @@
 # Chute
-Chute chains functions and native methods in JavaScript. ~2KB.
+Chute chains global functions and native methods in JavaScript. ~2KB.
 
 ```js
 chute(data)
