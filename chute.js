@@ -1,10 +1,15 @@
 const chute = (()=>{
-  //CHUTE: Chain functions AND methods
-  //https://github.com/gregabbott/chute
-  //By + Copyright Greg Abbott 2024-11-27 (V1) + 2024-11-28 (V)
-  //Changes: Adds calling global functions via method style
+/*
+CHUTE: Chain functions AND methods
+https://github.com/gregabbott/chute
+By + Copyright Greg Abbott 2024-11-27 (V1) + 2024-11-28.2 (V)
+Changes:
+Adds calling global functions via method style
+Adds placeholder to call function with data at specific argument
+*/
   let data
   let key_is=null
+  let data_placeholder={}
   const error=(...x)=>{throw new Error(x)}
   const is_fn=x=>x instanceof Function
   const is_js_method=(o,k)=>is_fn(Object.getPrototypeOf(o)[k])
@@ -24,7 +29,16 @@ const chute = (()=>{
     if(is_js_method(data,key)){data=data[key](...a)}
     else if(is_global_fn(key)){
       if(a.length==0)data= globalThis[key](data)
-      if(a.length>0)data= globalThis[key](...a)(data)
+      if(a.length>0){
+        let placeholder_i = a.indexOf(data_placeholder)
+        if(placeholder_i!==-1){
+          a[placeholder_i]=data//Swap placeholder for data
+          data = globalThis[key](...a)
+        }
+        else{
+          data= globalThis[key](...a)(data)
+        }
+      }
     }
     else error(`Data lacks "${key}" method|Not a global Fn`)
   }
@@ -40,8 +54,9 @@ const chute = (()=>{
     else if(cond_is_fn&&cond(data)===true)data=fn(data)
     else if(cond===true)data=fn(data)
   }
+  var target=function target(){}
   const proxy = new Proxy(
-    function target(){}, 
+    target, 
     {
     get(target,k){
       key_is=k
@@ -60,9 +75,11 @@ const chute = (()=>{
       return proxy
     }
   })
-  return (x,...fns)=>{
+  let set_up = (x,...fns)=>{
     data=x
     if(fns.length>0)data=sub_chain(fns)
     return proxy
   }
+  set_up._=data_placeholder
+  return set_up 
 })()

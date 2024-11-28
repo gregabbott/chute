@@ -5,6 +5,8 @@
 <meta name=color-scheme content="dark light">
 <link rel=icon href=data:;base64,iVBORw0KGgo=>
 <link rel="stylesheet" href="c.css">
+<script src="highlight.11.7.0.min.js"></script>
+<script src="chute.js"></script>
 <title>Chute &mdash; Chain Functions AND Native Methods in Vanilla JavaScript</title>
 </head>
 <body>
@@ -13,8 +15,8 @@
 
  Language: Vanilla JavaScript
 Version 1: 2024-11-27
-  Version: 2024-11-28
-      Log: Adds calling global functions in a method call style.
+  Version: 2024-11-28.2
+     View: <a href=chute.js>Normal</a> (2KB)
  Download: <a download href=chute.js>Normal</a> (2KB)
            <a download href=chute.min.js>Minified</a> (1KB)
    Notice: <span title='copyright Greg Abbott 2024'>By and &copy; <a href="https://gregabbott.pages.dev/">Greg Abbott</a> 2024</span>
@@ -49,170 +51,108 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     Current colors taken from GitHub's CSS
   */.hljs{color:#c9d1d9;background:#000000}.hljs-doctag,.hljs-keyword,.hljs-meta .hljs-keyword,.hljs-template-tag,.hljs-template-variable,.hljs-type,.hljs-variable.language_{color:#ff7b72}.hljs-title,.hljs-title.class_,.hljs-title.class_.inherited__,.hljs-title.function_{color:#d2a8ff}.hljs-attr,.hljs-attribute,.hljs-literal,.hljs-meta,.hljs-number,.hljs-operator,.hljs-selector-attr,.hljs-selector-class,.hljs-selector-id,.hljs-variable{color:#79c0ff}.hljs-meta .hljs-string,.hljs-regexp,.hljs-string{color:#a5d6ff}.hljs-built_in,.hljs-symbol{color:#ffa657}.hljs-code,.hljs-comment,.hljs-formula{color:#8b949e}.hljs-name,.hljs-quote,.hljs-selector-pseudo,.hljs-selector-tag{color:#7ee787}.hljs-subst{color:#c9d1d9}.hljs-section{color:#1f6feb;font-weight:700}.hljs-bullet{color:#f2cc60}.hljs-emphasis{color:#c9d1d9;font-style:italic}.hljs-strong{color:#c9d1d9;font-weight:700}.hljs-addition{color:#aff5b4;background-color:#033a16}.hljs-deletion{color:#ffdcd7;background-color:#67060c}
   </style>
-<details><summary>Script</summary>
-
-<pre><code class="hljs"><span class="hljs-keyword">const</span> chute = (<span class="hljs-function">()=&gt;</span>{
-  <span class="hljs-comment">//CHUTE: Chain functions AND methods</span>
-  <span class="hljs-comment">//https://github.com/gregabbott/chute</span>
-  <span class="hljs-comment">//By + Copyright Greg Abbott 2024-11-27 (V1) + 2024-11-28 (V)</span>
-  <span class="hljs-comment">//Changes: Adds calling global functions via method style</span>
-  <span class="hljs-keyword">let</span> data
-  <span class="hljs-keyword">let</span> key_is=<span class="hljs-literal">null</span>
-  <span class="hljs-keyword">const</span> <span class="hljs-title function_">error</span>=(<span class="hljs-params">...x</span>)=&gt;{<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(x)}
-  <span class="hljs-keyword">const</span> <span class="hljs-title function_">is_fn</span>=x=&gt;x <span class="hljs-keyword">instanceof</span> <span class="hljs-title class_">Function</span>
-  <span class="hljs-keyword">const</span> <span class="hljs-title function_">is_js_method</span>=(<span class="hljs-params">o,k</span>)=&gt;<span class="hljs-title function_">is_fn</span>(<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">getPrototypeOf</span>(o)[k])
-  <span class="hljs-keyword">function</span> <span class="hljs-title function_">sub_chain_reducer</span> (data,f){
-    <span class="hljs-keyword">if</span>(<span class="hljs-title function_">is_fn</span>(f))<span class="hljs-keyword">return</span> <span class="hljs-title function_">f</span>(data)
-    <span class="hljs-keyword">if</span>(f===<span class="hljs-string">&#x27;log&#x27;</span>){<span class="hljs-variable language_">console</span>[f](data);<span class="hljs-keyword">return</span> data}
-    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(<span class="hljs-keyword">typeof</span> f===<span class="hljs-string">&#x27;string&#x27;</span>){
-      <span class="hljs-keyword">if</span>(<span class="hljs-title function_">is_js_method</span>(data,f)) <span class="hljs-keyword">return</span> data[f]()
-      <span class="hljs-keyword">else</span> <span class="hljs-title function_">error</span>(<span class="hljs-string">`Data lacks &quot;<span class="hljs-subst">${f}</span>&quot; method`</span>)
-    }
-    <span class="hljs-keyword">else</span> {<span class="hljs-title function_">error</span>(<span class="hljs-string">&#x27;Not a function:&#x27;</span>,f)}
-    <span class="hljs-keyword">return</span> data
-  }
-  <span class="hljs-keyword">const</span> <span class="hljs-title function_">sub_chain</span>=a=&gt;a.<span class="hljs-title function_">reduce</span>(sub_chain_reducer,data)
-  <span class="hljs-keyword">function</span> <span class="hljs-title function_">is_global_fn</span>(<span class="hljs-params">name</span>){<span class="hljs-keyword">return</span> <span class="hljs-title function_">is_fn</span>(globalThis[name])}
-  <span class="hljs-keyword">const</span> <span class="hljs-title function_">call_method_of_data</span>=(<span class="hljs-params">key,a</span>)=&gt;{
-    <span class="hljs-keyword">if</span>(<span class="hljs-title function_">is_js_method</span>(data,key)){data=data[key](...a)}
-    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(<span class="hljs-title function_">is_global_fn</span>(key)){
-      <span class="hljs-keyword">if</span>(a.<span class="hljs-property">length</span>==<span class="hljs-number">0</span>)data= globalThis[key](data)
-      <span class="hljs-keyword">if</span>(a.<span class="hljs-property">length</span>&gt;<span class="hljs-number">0</span>)data= globalThis[key](...a)(data)
-    }
-    <span class="hljs-keyword">else</span> <span class="hljs-title function_">error</span>(<span class="hljs-string">`Data lacks &quot;<span class="hljs-subst">${key}</span>&quot; method|Not a global Fn`</span>)
-  }
-  <span class="hljs-keyword">const</span> <span class="hljs-title function_">if_then</span>=(<span class="hljs-params">{cond,fn}</span>)=&gt;{
-    <span class="hljs-keyword">const</span> cond_is_fn=<span class="hljs-title function_">is_fn</span>(cond)
-    <span class="hljs-keyword">const</span> good_cond=cond_is_fn||cond===<span class="hljs-literal">false</span>||cond===<span class="hljs-literal">true</span>
-    <span class="hljs-keyword">if</span>(!good_cond){
-      <span class="hljs-title function_">error</span>(<span class="hljs-string">&#x27;give .if(arg1) bool OR test=data=&gt;{…return bool}&#x27;</span>)
-    }
-    <span class="hljs-keyword">if</span>(!<span class="hljs-title function_">is_fn</span>(fn)){
-      <span class="hljs-title function_">error</span>(<span class="hljs-string">&#x27;give .if(,arg2) a Fn to send data to&#x27;</span>,fn)
-    }
-    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(cond_is_fn&amp;&amp;<span class="hljs-title function_">cond</span>(data)===<span class="hljs-literal">true</span>)data=<span class="hljs-title function_">fn</span>(data)
-    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(cond===<span class="hljs-literal">true</span>)data=<span class="hljs-title function_">fn</span>(data)
-  }
-  <span class="hljs-keyword">const</span> proxy = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Proxy</span>(
-    <span class="hljs-keyword">function</span> <span class="hljs-title function_">target</span>(<span class="hljs-params"></span>){}, 
-    {
-    <span class="hljs-title function_">get</span>(<span class="hljs-params">target,k</span>){
-      key_is=k
-      <span class="hljs-keyword">return</span> proxy
-    },
-    <span class="hljs-attr">apply</span>:<span class="hljs-function">(<span class="hljs-params">target,_, a</span>)=&gt;</span>{
-      <span class="hljs-keyword">let</span> key = key_is
-      <span class="hljs-keyword">if</span>(key_is)key_is=<span class="hljs-literal">null</span>
-      <span class="hljs-keyword">if</span>(key==<span class="hljs-string">&#x27;log&#x27;</span>){<span class="hljs-variable language_">console</span>[key](...a,data);}
-      <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(key==<span class="hljs-string">&#x27;if&#x27;</span>){<span class="hljs-title function_">if_then</span>({<span class="hljs-attr">cond</span>:a[<span class="hljs-number">0</span>],<span class="hljs-attr">fn</span>:a[<span class="hljs-number">1</span>]})}
-      <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(key==<span class="hljs-string">&#x27;tap&#x27;</span>&amp;&amp;<span class="hljs-title function_">is_fn</span>(a[<span class="hljs-number">0</span>]))a[<span class="hljs-number">0</span>](data)
-      <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(key==<span class="hljs-string">&#x27;tap&#x27;</span>)<span class="hljs-title function_">error</span>(<span class="hljs-string">&#x27;give .tap a fn to send data to&#x27;</span>)
-      <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(key===<span class="hljs-literal">null</span>&amp;&amp;a.<span class="hljs-property">length</span>===<span class="hljs-number">0</span>)<span class="hljs-keyword">return</span> data
-      <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(key===<span class="hljs-literal">null</span>||key===<span class="hljs-string">&#x27;and&#x27;</span>)data=<span class="hljs-title function_">sub_chain</span>(a)
-      <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(key)<span class="hljs-title function_">call_method_of_data</span>(key,a)
-      <span class="hljs-keyword">return</span> proxy
-    }
-  })
-  <span class="hljs-keyword">return</span> <span class="hljs-function">(<span class="hljs-params">x,...fns</span>)=&gt;</span>{
-    data=x
-    <span class="hljs-keyword">if</span>(fns.<span class="hljs-property">length</span>&gt;<span class="hljs-number">0</span>)data=<span class="hljs-title function_">sub_chain</span>(fns)
-    <span class="hljs-keyword">return</span> proxy
-  }
-})()</code></pre>
 
 
-
-
-
-
-</details>
 <details open><summary>Example use</summary>
 
-
-
-
-
-
-<pre><code class="hljs"><span class="hljs-keyword">let</span> initial_data = [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">4</span>]
-<span class="hljs-keyword">const</span> result = <span class="hljs-title function_">chute</span>(initial_data,<span class="hljs-comment">/*any functions…*/</span><span class="hljs-title function_">push</span>(<span class="hljs-number">8</span>))
-  <span class="hljs-comment">//Chute can alternate function and method calls.</span>
-  <span class="hljs-comment">//==== METHOD CALLS</span>
-  <span class="hljs-comment">// Method calls native to the current data work as normal:</span>
-  .<span class="hljs-title function_">map</span>(double)
-  .<span class="hljs-title function_">filter</span>(<span class="hljs-title function_">greater_than</span>(<span class="hljs-number">4</span>))
-  <span class="hljs-comment">//==== FUNCTION CALLS</span>
-  <span class="hljs-comment">//Chute provides a few ways to call functions.</span>
-  <span class="hljs-comment">//== SUB CHAINS:</span>
-  <span class="hljs-comment">//&quot;.and&quot; sends data through 1+ functions.</span>
-  <span class="hljs-comment">//&quot;.and(f1,f2)&quot; sends data to f1, then f1&#x27;s return to f2.</span>
-  .<span class="hljs-title function_">and</span>(<span class="hljs-title function_">push</span>(<span class="hljs-number">32</span>),<span class="hljs-title function_">push</span>(<span class="hljs-number">64</span>))
-  <span class="hljs-comment">//Nameless calls work the same way as &quot;.and&quot;:</span>
-  (<span class="hljs-title function_">push</span>(<span class="hljs-number">80</span>,<span class="hljs-number">128</span>),<span class="hljs-title function_">push</span>(<span class="hljs-number">256</span>))
-  <span class="hljs-comment">//these sub-chains use a reducer to mimic nested calls.</span>
-    <span class="hljs-comment">//&quot;(f1,f2)&quot; == &quot;f2(f1(x))&quot;</span>
-  <span class="hljs-comment">//strings can call methods that need no arguments:</span>
-  (<span class="hljs-string">&#x27;reverse&#x27;</span>)<span class="hljs-comment">//for sequences like: &quot;.and(f1,&#x27;method&#x27;,f2)&quot;.</span>
-  <span class="hljs-comment">//== METHOD STYLE GLOBAL FUNCTION CALLS:</span>
-  <span class="hljs-comment">//&quot;.name_of_a_global_function&quot; calls a global function:</span>
-  .<span class="hljs-title function_">wrap_in_array</span>()<span class="hljs-comment">//no arguments == &quot;fn(data)&quot;</span>
-  .<span class="hljs-title function_">get_index</span>(<span class="hljs-number">0</span>)<span class="hljs-comment">//arguments == &quot;fn(arguments)(data)&quot;</span>
-  <span class="hljs-comment">//Under consideration: A placeholder system.</span>
-    <span class="hljs-comment">//e.g. &quot;.fn(arg_1, placeholder_for_data_here, arg_3)&quot;.</span>
-  <span class="hljs-comment">//Chute can call global functions with unoccupied names.</span>
-    <span class="hljs-comment">//Chute looks for methods before global functions.</span>
-    <span class="hljs-comment">//It checks the current data&#x27;s native methods.</span>
-    <span class="hljs-comment">//It also check&#x27;s Chute&#x27;s built in methods:</span>
-  <span class="hljs-comment">//BUILT IN METHODS</span>
-  <span class="hljs-comment">//Chute also has &quot;log&quot;, &quot;tap&quot;, and &quot;if&quot; methods.</span>
-  <span class="hljs-comment">//&quot;.log&quot; calls a built in method that takes 0+ arguments.</span>
-  .<span class="hljs-title function_">log</span>()<span class="hljs-comment">//&quot;.log()&quot; logs the current data, then resumes.</span>
-  .<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Pre-tap data&#x27;</span>)<span class="hljs-comment">// &quot;.log&quot; logs arguments before data.</span>
-  <span class="hljs-comment">//&#x27;.tap&#x27; calls a built in method that takes one function.</span>
-  <span class="hljs-comment">//&#x27;.tap(f1)&#x27; sends the data to f1 but ignores the result.</span>
-  .<span class="hljs-title function_">tap</span>(mutate)<span class="hljs-comment">//.tap functions might mutate data directly.</span>
-  .<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Post-tap data&#x27;</span>)
-  <span class="hljs-comment">//&#x27;.if&#x27; calls a built in method that takes 2 arguments.</span>
-  .<span class="hljs-title function_">if</span>(<span class="hljs-comment">//Argument 1</span>
-    <span class="hljs-comment">//a boolean (some unrelated check e.g. &quot;is_saturday()&quot;)</span>
-    <span class="hljs-comment">//or a function that tests the data and return a boolean.</span>
-    is_array,
-    <span class="hljs-comment">//Argument 2:A function to send the data through</span>
-      <span class="hljs-comment">//(If the condition equals the boolean true.)</span>
-    sum
-  )
-  .<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;after if method:&quot;</span>)
-  ()<span class="hljs-comment">//an empty call returns the final value</span>
-  <span class="hljs-comment">//from this point, method calls directly act on the data.</span>
-  .<span class="hljs-title function_">toString</span>()
-  .<span class="hljs-title function_">replace</span>(<span class="hljs-regexp">/$/</span>,<span class="hljs-string">&#x27;!&#x27;</span>)
-<span class="hljs-title function_">log</span>({result})
-
-<span class="hljs-comment">//Demo Helper Functions</span>
-
-<span class="hljs-keyword">function</span> <span class="hljs-title function_">get_index</span>(<span class="hljs-params">i</span>){<span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-params">data</span> =&gt;</span> data[i]}
-<span class="hljs-keyword">function</span> <span class="hljs-title function_">wrap_in_array</span>(<span class="hljs-params">data</span>){<span class="hljs-keyword">return</span> [data]}
-<span class="hljs-keyword">function</span> <span class="hljs-title function_">push</span> (...a){<span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-params">l</span> =&gt;</span> (l.<span class="hljs-title function_">push</span>(...a),l)}
-<span class="hljs-keyword">function</span> <span class="hljs-title function_">log</span> (x){<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;outer_log&#x27;</span>,x);<span class="hljs-keyword">return</span> x}
-<span class="hljs-keyword">function</span> <span class="hljs-title function_">greater_than</span>(<span class="hljs-params">n</span>){ <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-params">x</span> =&gt;</span> x &gt; n}
-<span class="hljs-keyword">function</span> <span class="hljs-title function_">double</span>(<span class="hljs-params">x</span>){<span class="hljs-keyword">return</span> x * <span class="hljs-number">2</span>}
-<span class="hljs-keyword">function</span> <span class="hljs-title function_">sum</span>(<span class="hljs-params">data</span>){<span class="hljs-keyword">return</span> data.<span class="hljs-title function_">reduce</span>(<span class="hljs-function">(<span class="hljs-params">a,b</span>)=&gt;</span>a+b)}
-<span class="hljs-keyword">function</span> <span class="hljs-title function_">is_array</span>(<span class="hljs-params">data</span>){<span class="hljs-keyword">return</span> <span class="hljs-title class_">Array</span>.<span class="hljs-title function_">isArray</span>(data)}
-<span class="hljs-keyword">function</span> <span class="hljs-title function_">mutate</span> (data){
-  data.<span class="hljs-property">length</span>=<span class="hljs-number">2</span>
-  <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;chucks this returned value&#x27;</span>
-}</code></pre>
-
-
-
-
-
-
-
-
-
-
-
+<pre><code id="show_example_use"></code></pre>
 
 </details>
+<script defer id="example_use">
+let initial_data = [1, 2, 4]
+//NOTE 1: Named the function "chute" for a clear example
+  //In actual usage a single character works best: "_"
+const result = chute(initial_data,/*any functions…*/push(8))
+  //Chute can alternate function and method calls.
+  //==== METHOD CALLS
+  // Method calls native to the current data work as normal:
+  .map(double)
+  .filter(greater_than(4))
+  //==== FUNCTION CALLS
+  //Chute provides a few ways to call functions.
+  //== SUB CHAINS:
+  //".and" sends data through 1+ functions.
+  //".and(f1,f2)" sends data to f1, then f1's return to f2.
+  .and(push(32),push(64))
+  //Nameless calls work the same way as ".and":
+  (push(80,128),push(256))
+  //these sub-chains use a reducer to mimic nested calls.
+    //"(f1,f2)" == "f2(f1(x))"
+  //strings can call methods that need no arguments:
+  ('reverse')//for sequences like: ".and(f1,'method',f2)".
+  //== METHOD STYLE GLOBAL FUNCTION CALLS:
+  //".name_of_a_global_function" calls a global function:
+  .wrap_in_array()//no arguments == "fn(data)"
+  .get_index(0)//arguments == "fn(arguments)(data)"
+  //PLACEHOLDERS
+  //Call a function with a data argument placeholder.
+  .placeholder_test('arg1',chute._/*<-placeholder*/,'arg3')
+    //The property "._" of the chute function's name
+    //If you name chute "_", the placeholder === '_._'
+    //(Initial implementation: subject to change)
+  //Chute can call global functions with unoccupied names.
+    //Chute looks for methods before global functions.
+    //It checks the current data's native methods.
+    //It also check's Chute's built in methods:
+  //BUILT IN METHODS
+  //Chute also has "log", "tap", and "if" methods.
+  //".log" calls a built in method that takes 0+ arguments.
+  .log()//".log()" logs the current data, then resumes.
+  .log('Pre-tap data')// ".log" logs arguments before data.
+  //'.tap' calls a built in method that takes one function.
+  //'.tap(f1)' sends the data to f1 but ignores the result.
+  .tap(mutate)//.tap functions might mutate data directly.
+  .log('Post-tap data')
+  //'.if' calls a built in method that takes 2 arguments.
+  .if(//Argument 1
+    //a boolean (some unrelated check e.g. "is_saturday()")
+    //or a function that tests the data and return a boolean.
+    is_array,
+    //Argument 2:A function to send the data through
+      //(If the condition equals the boolean true.)
+    sum
+  )
+  .log("After if method:")
+  ()//an empty call returns the final value
+  //from this point, method calls directly act on the data.
+  .toString()
+  .replace(/$/,'!')
+log(`Chute Result`,result)
+
+//Demo Helper Functions
+
+function placeholder_test(arg_1,the_data,arg_2){
+  console.log(new Map([
+    ["argument_1", arg_1],
+    ["the_data given with placeholder argument", the_data],
+    ["argument_2", arg_2]
+  ])
+  )
+  return the_data
+}
+function get_index(i){return data => data[i]}
+function wrap_in_array(data){return [data]}
+function push (...a){return l => (l.push(...a),l)}
+function log (...x){console.log(...x);return x}
+function greater_than(n){ return x => x > n}
+function double(x){return x * 2}
+function sum(data){return data.reduce((a,b)=>a+b)}
+function is_array(data){return Array.isArray(data)}
+function mutate (data){
+  data.length=2
+  return 'chucks this returned value'
+}
+</script>
+<script defer>
+   window.addEventListener('load', ()=>{
+
+document.getElementById('show_example_use').innerHTML=
+  hljs.highlight(
+    document.getElementById('example_use').textContent,
+    { language: 'javascript' }
+  ).value
+
+})
+</script>
 </body>
 </html>
