@@ -1,0 +1,29 @@
+<a href="index.html">CHUTE</a> BY + (C) GREG ABBOTT 2024
+<pre>
+# CHANGES
+
+# 2024-11-30
+Adds stricter conditions to 'is if block' function.
+Memoizes all functions given as if or else if conditions.
+Cleans documentation.
+
+# 2024-11-29
+Renames built in '.and' method to '.do'.
+Accepts locally scoped functions via do call: ".do(local_fn)".
+Refactors internal functions towards a data passing style.
+Renames placeholder token to '.x'. (Subject to change.)
+Adds "current value" token '._': ".do(5 * chuteName._)".
+Adds examples of chaining with using expressions and literals.
+Memoizes named non-global functions received via ".do(local)".
+Allows method-style calling of memoized non global functions.
+Add conditional block ".do({if:[q,a],else_if:[[q,a]…]else:f}"
+Memoizes functions received via ".if" and conditional block.
+
+# 2024-11-28
+Adds method style global function calling ".function_name(arg)".
+Adds token to calls Fns with data as argument N.
+Adds chain calling without parentheses e.g. '.log.reverse.log'
+
+# 2024-11-27
+V1
+</pre>

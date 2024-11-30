@@ -40,6 +40,9 @@ body{
         filter: invert(1);
     }
 }
+a,a:visited{
+color: var(--fg);
+}
 [popover]{
 	/*default*/
 	position: fixed;
