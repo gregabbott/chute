@@ -6,7 +6,7 @@
 <link rel=icon href=data:;base64,iVBORw0KGgo=>
 <link rel="stylesheet" href="c.css">
 <script src="highlight.11.7.0.min.js"></script>
-<script src="chute.js"></script>
+<script src="chute.min.js"></script>
 <title>Chute &mdash; Chain Functions AND Native Methods in Vanilla JavaScript</title>
 </head>
 <body>
@@ -15,7 +15,7 @@
 
  Language: Vanilla JavaScript
 Version 1: 2024-11-27
-  Version: 2024-11-29
+  Version: 2024-12-01
      View: <a href=chute.js>Normal</a>
  Download: <a download href=chute.js>Normal</a> (8KB)
            <a download href=chute.min.js>Minified</a> (2KB)
@@ -63,151 +63,207 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 <script defer id="example_use">
 demonstrate_scope()
 function demonstrate_scope(){
-  let seed = [1, 2, 4]
-  const result = chute(seed,//start chute with a value
-    /*optional first functions to send data through:*/
-    pusher(8)
-  )//The main functionality starts after calling chute.
+const example_1 = chute(
+  //Set up a chute with a seed value
+  [1, 2, 4],
+  //Optionally include any first functions to send data through
+  global_push(8) //fn2, fn3, fn4… (works like f2(f1(data)) etc.)
+)
 //==============================================================
-  //CALL METHODS
-  // Method calls native to the current data work as normal.
-  .map(double)
-  .filter(greater_than(4))
-  .reverse//Methods that need no argument need no parentheses.
-  //Chute has basic handling of non-returning methods.
-  .push(6)//push returns the updated data, not the new length.
-  .forEach(x=>log('Side Effect: '+x))
+//CALL METHODS
+// Method calls native to the current data work as normal.
+.map(double)
+.filter(greater_than(4))
+//Methods that need no argument need no parentheses.
+.reverse
+.push(6)//.push returns the updated data to continue the chute.
+.forEach(x=>log(`Side FX: ${x}`))
+//The chute resumes after .forEach
 //==============================================================
-  //CALL GLOBAL FUNCTIONS
-  //------------------------------------------------------------
-  //VIA NAMED CALLS (method chain style)
-  //".f_name()" calls any global function named "f_name".
-  //If chute sees no arguments, it sends the data as argument 1.
-  //".f_name()" or ".f_name" act like "data = f_name(data)"
-  .wrap_in_array
-  //Chute keeps the return value for any next step in the chain.
-  .get_index(0)//".f(arguments)" == "data = f(arguments)(data)"
-  //------------------------------------------------------------
-   //VIA ".do" CALLS (these can work as Sub-chains)
-  //".do" sends data through 1+ functions in a single call.
-  //".do(f1,f2)" sends data to f1, then f1's return to f2.
-  .do(pusher(32),pusher(64)/*etc*/)
-  //Nameless ".do" calls work the same way.
-  (pusher(80),pusher(128,250))
-  //sub-chains use reduce so mimic nested calls.
-  //".do(f1,f2)" works like "f2(f1(x))"
+//CALL GLOBAL FUNCTIONS
+//------------------------------------------------------------
+//Call Global Functions Via Named Calls (method chain style)
+//".f_name()" calls any global function named "f_name".
+//If chute sees no arguments, it sends the data as argument 1.
+//".f_name()" or ".f_name" act like "data = f_name(data)"
+.wrap_in_array
+//Chute keeps the return value for any next step in the chain.
+.get_index(0)//".f(arguments)" == "data = f(arguments)(data)"
+//------------------------------------------------------------
+//Call Any Functions Via ".do" Calls (Sub-chains)
+//".do" sends data through 1+ functions in a single call.
+//".do(f1,f2)" sends data to f1, then f1's return to f2.
+.do(global_push(32),local_push(64)/*etc*/)
+//Nameless ".do" calls work the same way.
+(local_push(80),global_push(128,250))
+//sub-chains use reduce to mimic nested calls
+  //".do(f1,f2)" works like "f2(f1(data))"
+  //Instead of `data=f1(data); data=f2(data)`
 //==============================================================
-  //CALL NON-GLOBAL / SCOPED FUNCTIONS
-  //Chute's built in methods can receive non-global functions.
-  (local_unary)
-  //Chute remembers each named non-global function it receives,
-  //and then makes it available to call by name later:
-  .local_unary
-  //------------------------------------------------------------
-  //The call inside the call below returns an unnamed function.
-  (local_push(80))
-  //Chute sends the data through the function, keeps the return,
-  //but discards the function with no name to call it by later.
+//CALL NON-GLOBAL / SCOPED / LOCAL FUNCTIONS
+//All of Chute's built in methods can receive any functions.
+//This allows for passing in non-global functions, as above.
+(local_unary)//Non-global functions must use do to begin with.
+//Chute remembers each named non-global function it receives,
+//and makes it available to call method style after that point.
+.local_unary//The above call let Chute '.call' this non-global.
+//------------------------------------------------------------
+//The call inside the call below returns an unnamed function.
+(local_push(80))//e.g. list=>list.push(80)
+//Chute sends the data through the function, keeps the return,
+//then forgets the function which lacks a name to call it by.
 //==============================================================
-  //ORDER
-  //Chute evaluates what to do per named call.
-  //Chute checks the called name against names of other actions.
-  //If nothing matches Chute returns an error.
-  //Otherwise it calls the first item found with the same name.
-    //A method built in to Chute. (more details below)
-    //A native method of the current data.
-    //A global function
-    //A named non-global function (from some previous call)
+//ORDER
+//Chute evaluates what to do per method-style call it receives.
+//Chute checks the called name against names of other actions.
+//If nothing matches, Chute returns an error.
+//Otherwise it calls the first item found with the same name.
+//Chute searches for matches in this order:
+  //A method built in to Chute. (see more below)
+  //A native method of the current data. (e.g. .map .split)
+  //A global function.
+  //A named non-global function (from some previous call).
 //==============================================================
-  //TOKENS
-  //------------------------------------------------------------
-  //ARGUMENT PLACEHOLDER (For ".name" calls to functions)
-  //The 'x' property of the chute name holds this token.
-  //If Chute sees this token, it swaps it for the current data.
-  .placeholder_test('Normal Argument',/*Token:*/chute.x)
-  //The above call equates to: "data = fn(argument 1, data)".
-  
-  //When a method-style function call has arguments and no token
-  //Chute expects the function call to return another function.
-  //It then sends the data to that function, keeping the result.
-  //e.g. ".fn(a,b,c)" == "data = fn(arguments)(data)"
-  //------------------------------------------------------------
-  //CURRENT VALUE TOKEN
-  //the '_' property of the chute name holds the current data.
-  //use it for inline expressions
-  .do(chute._[3])//Property access
-  .do((chute._+64))//Arithmetic
-  .do({data:chute._})//Object literals
-  .do(`Answer is "${chute._.data}"`)//Template literals
-  .do(4>2?extract_quoted:chute._)//Ternary (with function call)
-  .do([48,64,80,chute._])//Array literal
-//==============================================================
-  //BUILT IN METHODS
-  //------------------------------------------------------------
-  //LOG
-  //The built in ".log()" method logs the current data.
-  .log
-  //If it receives any arguments, it logs these before the data.
-  .log('Log with note')
-  //------------------------------------------------------------
-  //TAP
-  //".tap" calls a built in method that takes one function.
-  //Chute sends the data to function, ignoring any return value.
-  //Even so, a ".tap" function might mutate data directly.
-  .tap(mutate)
-  .log('Post-tap data')
-  //------------------------------------------------------------
-  //IF (basic)
-  //'.if' calls a built in method that takes 2 arguments.
-  //Argument 1 takes a value [e.g. "is_saturday()"]
-  //or a function. Chute calls any function and uses the result.
-  //".if(fn)" == "if(fn(data))"
-  
-  //A truthy argument 1 value lets Chute evaluate Argument 2
-  //Argument 2 can hold: a value to replace the current data;
-  //or a function to send the data through, keeping the return.
-  .if(is_array,sum)
-  .log('Sum: ')
-  //The data remains the same when the condition proves falsey.
-//==============================================================
-  //IF ELSE BLOCK 
-  //An object usable within ".do" calls.
+//ARGUMENT PLACEHOLDER (For ".function_name()" style calls)
+//Chute uses a placeholder (property 'x' of the function name),
+//to give functions the current data at a set argument position.
+.placeholder_test("see data in console ->",chute.x)
+//The above call equates to: "data = fn(string, current_data)".
 
-  //Shape:
-  //It needs an 'if' property that holds a 2 element array.
-  //The other properties, else_if, and else, remain optional.
-  //any "else_if" property holds an array, of 2 element arrays.
-  //any "else" property holds a value, or a function to use.
-  //The block can have 'else' without 'else_if' or vice-versa.
-  //The object must have no other properties.
-  
-  //The block returns the value of the first matching condition.
-  //A matching condition may return a function to send data to.
-  //In that case, Chute calls it and keeps the value it returns.
-  //Without an 'else' property or a match, data stays unchanged.
-  ({
-    if: [is_array, 8],
-    else_if: [
-      [is_string, 16],
-      [   Number, local_scope_x10],
-    ],
-    else: 41
-  })
-  //Chute remembers non-global functions if blocks mention too.
-  .local_scope_x10
+//Per named function call, Chute looks through each argument,
+//and swaps any placeholder it finds for the current data.
+
+//When a .function call has arguments but no data placeholder,
+//Chute expects the function call to return another function.
+//It then sends the data to that function, keeping the result.
+//e.g. ".fn(a,b)" == "data = fn(user provided arguments)(data)"
+//This pattern goes well with Chute `({named parameters})(data)`
 //==============================================================
-  //ENDING THE CHUTE
-  //a named call before the chain end needs parentheses '()'.
-  .log()//[<- Design under consideration]
-  ()//<- an empty call returns the data value, ending the chute.
-  //From this point, method calls directly act on the data.
-  .toString()
-  .replace(/$/,'!')
-  log(`Chute Result:`,result)
-  
-  function local_push(...a){return l=>(l.push(...a),l)}
-  function local_unary(f){log('Local Unary');return f}
-  function local_scope_x10(f){log(`LocalTenfold`);return f*10}
+//BUILT IN METHODS
+//------------------------------------------------------------
+//LOG 
+//The built in ".log()" method logs the current data.
+.log
+//If it receives any arguments, it logs these before the data.
+.log('Log with note')
+//------------------------------------------------------------
+//TAP
+//".tap" calls a built in method that takes one function.
+//Chute sends the data to function, ignoring any return value.
+.tap(mutate)//A ".tap" function might mutate data directly.
+.log('Post-tap data')
+//------------------------------------------------------------
+//IF (basic)
+//'.if' calls a built in method that takes 2 arguments.
+//Argument 1 takes a value [e.g. "is_saturday()"] or a function.
+//Chute sends the data through any function and uses the result.
+//".if(test_fn,arg_2)" == "if(test_fn(data)){data = arg_2}"
+
+//A truthy argument 1 value leads Chute to evaluate argument 2.
+//If argument 2 holds a value, it replaces the chute data.
+//If it holds a function, Chute sends the current data to it.
+//The function return value replaces the chute data.
+.if(is_array,sum)
+.log('Sum: ')
+//The data remains the same when a condition proves falsey.
+//==============================================================
+//Inline functions
+//One alternative to the current value token (detailed below).
+(x=>x*3)//Anything at all
+.log("Tripled")
+//==============================================================
+//IF ELSE BLOCK (usable within ".do" calls.) 
+//(A placeholder implementation - changes planned)
+
+//Shape:
+//The If Else block needs an object with an "if" property.
+//The "if" property must hold a 2 item array.
+//Two other optional properties include "else_if" and "else".
+//Any "else_if" property holds an array of 2 element arrays.
+//Any "else" property holds a value, or a function.
+//The block can have "else" without "else_if" or vice-versa.
+
+//Each 2 element array holds a condition [0] and returnable [1].
+//Chute checks each condition until it finds a truthy one.
+//Conditions may reference functions to test the current data,
+//Chute sends the current data value through these functions
+//and checks the truthiness of the value they return.
+
+//The If Else block returns a truthy condition's returnable.
+//When the "if else" block returns a value, Chute keeps it.
+//When the block returns a function, chute uses it.
+//Chute sends the current data to any returned function,
+//and keeps whatever that function returns as the new data.
+
+//With no 'else' property and no match, the data stays the same.
+({
+  if: [is_array, 8],
+  /*optional parts:*/
+  else_if: [
+    [is_string, 16             ],
+    [is_number, local_scope_x10],
+    [     true, 'yes'          ]
+  ],
+  else: 41
+})
+/* Equivalent:
+.do(the_current_data=>{
+  if(is_array(the_current_data)){
+    return 8
+  }
+  else if(is_string(the_current_data)){
+    return 16
+  }
+  else if(Number(the_current_data)){
+    return local_scope_x10(the_current_data)
+  }
+  else {
+    return 41
+  }
+})*/
+//Chute remembers non-global functions mentioned in if blocks:
+.local_scope_x10
+//==============================================================
+.toString
+//Index number access. 
+[0]//The value of this item becomes the chute data.
+//==============================================================
+//ENDING THE CHUTE
+//Any named call preceding the chain end needs parentheses '()'.
+.log()//[<- Design under consideration]
+()//<- An empty call returns the data value and ends the chute.
+//From this point, method calls directly act on the data.
+.toString()
+.replace(/$/,'!')
+log(`Chute Result:`,example_1)
+
+//==============================================================
+//CURRENT VALUE TOKEN
+//Chute has a built in '.with' method that takes a function.
+//It lets Chute update a non-global variable as it runs.
+//Calls in the chute can then reference the variable as needed.
+
+let x //any desired name for the "current value token"
+const chute_2 = chute().with(v=>x=v)//.with after call to chute
+({two:2,four:4,eight:8})//initial chute value
+//The token can now be used in calls
+//Access current data property
+(x.eight) //Instead of single use function "(x=>x.eight)"
+//Arithmetic
+(x + 10)//Instead of "(x=>x+10)"
+//Object literals
+({data:x})//Instead of "(x=>{data:x})"
+//Template literals
+(`Answer is "${x.data}"`)
+(4>2?extract_quoted:x)//Ternary (with function call)
+([48,64,80,parseInt(x)])//Array literal
+//`.do` may call any of the above calls for the same result.
+()
+log('chute_2 result',x)
+//Demo Helper Functions (Non-Global)
+function local_push(...a){return l=>(l.push(...a),l)}
+function local_unary(f){log('Local Unary');return f}
+function local_scope_x10(f){log(`LocalTenfold`);return f*10}
 }
 //Demo Helper Functions (Global)
 function return_falsey(){return 0}
@@ -215,13 +271,14 @@ function placeholder_test(a,x){log(a,x);return x}
 function extract_quoted(x){return x.replace(/.*?"(.*?)"/,'$1')}
 function get_index(i){return data => data[i]}
 function wrap_in_array(data){return [data]}
-function pusher (...a){return l => {l.push(...a);return l}}
+function global_push (...a){return l => {l.push(...a);return l}}
 function log (...x){console.log(...x);return x}
 function greater_than(n){ return x => x > n}
 function double(x){return x * 2}
 function sum(data){return data.reduce((a,b)=>a+b)}
 function is_array(data){return Array.isArray(data)}
 function is_string(data){return typeof data === 'string'}
+function is_number(v){return typeof v ==='number'&&!isNaN(v)}
 function mutate (d){log('Mutate');d.length=2;return 'chuck'}
 </script>
 <script>
