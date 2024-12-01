@@ -167,12 +167,12 @@ function make_proxy({seed,fns}){
   //Private data per chute
   let data = null,
     update_token_fn=null//lets user access running chute data
-  const set_data=x=>{      
+  //set and get data allows easy change of data location
+  const set_data=x=>{
   //console.log(`result of "${keys[0]||'nameless'}"`,x,typeof x)
     if(update_token_fn/*provided*/){update_token_fn(x)}
     data=x
   },
-  //in case of changing where its stored
   get_data=()=>data,
   target=()=>{}
   function get(target,k){
@@ -202,14 +202,14 @@ function make_proxy({seed,fns}){
       //.log   .reverse  .map   (              args) 
       //^1     ^2        ^3     ^the 'apply'   ^belong to ^3
       //Chute stores each .name_style_call until user gives '()'
-        //() applies to the key it comes after
-        //() may contain args for that most recent key
-      //on apply, chute goes through each stored .name_call
-      //it performs appropriate action based on the `.string`
-      //RE get index:
-      // user types [0]. this takes no arguments
-      //no function or method will start with or == number
-      //so can treat as instruction to update data to this value
+        //`()` applies to the key it directly follows.
+        //`()` may contain arguments for that most recent key.
+      //On apply, Chute goes through each stored `.name_call`.
+      //It performs appropriate action based on the exact call.
+      //GET INDEX
+      //When user types [0], this takes no arguments
+      //As no function or method will start with or == a number,
+      //Chute can treat as instruction to make data this value.
       let key_without_parens=keys.length>1&&i!==last_key
       if(key_without_parens){
         if(key=='log')console.log(get_data())
@@ -236,7 +236,8 @@ function make_proxy({seed,fns}){
             }
             else{
               update_token_fn=a[0]
-              update_token_fn(data)//initialise setup
+              //Token needs a value, user may have put `let x;`
+              update_token_fn(data)
             }
           }
         }
@@ -254,23 +255,22 @@ function make_proxy({seed,fns}){
         }
         else if(is_number(Number(key))){
           set_data(data[key])
-          //index access [0] takes no arguments
-          //so any '()' with args after is a .do call
+          //Index access takes no arguments. (e.g. `[0]`)
+          //So any '()' with arguments after [\d] is a .do call
           set_data(sub_chain(a,get_data()))
         }
         else if(key){
           set_data(call_method_of_data(get_data(),key,a))
         }
-        keys.length=0//clears keys array when processed all
+        keys.length=0//Processed all keys, reset array
       }
       return rv
     },proxy)
   }
   let proxy = new Proxy(target, {get,apply})
-  //initial `chute()` call
-    //may have provided seed value
+  //Use any seed value initial `chute()` may have provided:
     set_data(seed)
-    //may have provided initial functions to run
+  //Run data through any functions the initial chute call gave.
     if(fns.length>0)set_data(sub_chain(fns,seed))
   return proxy
 }
