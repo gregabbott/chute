@@ -99,9 +99,11 @@ margin-left:var(--rad);
 .hljs-title, .hljs-property, .function_{
   font-weight: bold;
 }
+/*
 .hljs-string {
- /* font-family: var(--sans);*/
+  font-family: var(--sans);
 }
+*/
 main {
   flex:1;
   overflow-y:auto;
