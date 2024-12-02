@@ -1,6 +1,6 @@
 const chute = (()=>{
 /* https://gregabbott.github.io/chute By + Copyright Greg Abbott
-[V1=2024-11-27][V=2024-12-02.1]*/
+[V1=2024-11-27][V=2024-12-02.2]*/
 const keys=[],
 stringy=x=>JSON.stringify(x),
 log=(...a)=>x=>(console.log(...a),x&&console.log(x),x),
@@ -133,7 +133,6 @@ const call_method_of_data=(data,key,a)=>{
     return data
   }
 }
-
 const when_then=({when,then,data})=>{
   let condition = when
   if(is_fn(when)){
@@ -171,10 +170,38 @@ const dot_if=({args,data})=>{
     return rv
   }
   error(`.if block incorrect`)
-   
   return data
-
-  
+}
+function handle_nested_access(keys_so_far,key,data,args){
+  function check_path_and_get_item(){
+    return keys_so_far.reduce((a,x,i)=>{
+      if(a[x]!==undefined){
+        a=a[x]
+        return a
+      }
+      else {
+        error(
+          `"${x}" not found at global path: "${
+            keys_so_far.join('.')}"`
+        )
+      }
+    },globalThis)
+  }
+  keys_so_far.push(key)
+  let item = check_path_and_get_item()
+  if(data){//Final key and args
+    if(is_fn(item)){
+      /**console.log({
+     path: `${keys_so_far.join('.')}`,
+     fn:item,
+     data,
+     args
+    })
+    /**/
+      return call_a_function(item,data,args)
+    }
+    else return data
+  }
 }
 function make_proxy({seed,fns}){
   //Private data per chute
@@ -186,6 +213,7 @@ function make_proxy({seed,fns}){
     if(update_token_fn/*provided*/){update_token_fn(x)}
     data=x
   },
+  nested_access=[],
   get_data=()=>data,
   target=()=>{}
   function get(target,k){
@@ -225,16 +253,19 @@ function make_proxy({seed,fns}){
       //Chute can treat as instruction to make data this value.
       let key_without_parens=keys.length>1&&i!==last_key
       if(key_without_parens){
-        if(key=='log')console.log(get_data())
+        if(key=='log')error('.log needs parens')
         else if(key=='if')error('.if needs 1-2 arguments')
         else if(key=='tap')error('.tap needs 1 fn argument')
         else if(key==='do')error('.do needs 1+ arguments')
         else if(is_number(Number(key))){
-          set_data(data[key])
+          set_data(get_data()[key])
         }
-        else if(key)set_data(
-          call_method_of_data(get_data(),key,[])
-        )
+        else if(key){
+          //e.g key 1 == `JSON`, key 2 == 'stringify' then "()"
+          //handling item in path before method
+          //method == string before ()
+          handle_nested_access(nested_access,key)//a.b.c()
+        }
         return rv
       }
       if(keys.length===1||i===last_key){
@@ -249,7 +280,8 @@ function make_proxy({seed,fns}){
             }
             else{
               update_token_fn=a[0]
-              //Token needs a value, user may have put `let x;`
+              //Token needs a value to work.
+              //User may have put `let x;`
               update_token_fn(data)
             }
           }
@@ -265,13 +297,22 @@ function make_proxy({seed,fns}){
           set_data(sub_chain(a,get_data()))
         }
         else if(is_number(Number(key))){
-          set_data(data[key])
+          //get index wanted
+          set_data(get_data()[key])
           //Index access takes no arguments. (e.g. `[0]`)
           //So any '()' with arguments after [\d] is a .do call
           set_data(sub_chain(a,get_data()))
         }
         else if(key){
-          set_data(call_method_of_data(get_data(),key,a))
+          if(nested_access.length>0){//if .a.b.c() this == 'c()'
+            set_data(
+              handle_nested_access(nested_access,key,get_data(),a)
+            )
+            nested_access.length=0//Reset
+          }
+          else{//.something()
+            set_data(call_method_of_data(get_data(),key,a))
+          }
         }
         keys.length=0//Processed all keys, reset array
       }
