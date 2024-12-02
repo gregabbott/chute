@@ -1,6 +1,6 @@
 const chute = (()=>{
 /* https://gregabbott.github.io/chute By + Copyright Greg Abbott
-[V1=2024-11-27][V=2024-12-01]*/
+[V1=2024-11-27][V=2024-12-02.1]*/
 const keys=[],
 stringy=x=>JSON.stringify(x),
 log=(...a)=>x=>(console.log(...a),x&&console.log(x),x),
@@ -81,21 +81,6 @@ function sub_chain_reducer(data,f){
     memoize_if_applicable(f)
     return f(data)
   }
-  if(is_object(f)&&is_condition_block(f)){
-    let rv = process_condition_block(f,data)
-    /**console.log({
-      data,
-      if_else_rv:rv,
-      rv_a_fn   :is_fn(rv),
-      unchanged :data===rv
-    })/**/
-    let unchanged=data===rv
-    if(unchanged)return data
-    if(is_fn(rv)){//already memoized in process_condition_block
-      return call_a_function(rv,data,[])
-    }
-    return rv
-  }
   return f//likely a result of Token expression EG`.do(token*5)`
 }
 const sub_chain=(a,data)=>a.reduce(sub_chain_reducer,data)
@@ -148,7 +133,8 @@ const call_method_of_data=(data,key,a)=>{
     return data
   }
 }
-const dot_if=({when,then,data})=>{
+
+const when_then=({when,then,data})=>{
   let condition = when
   if(is_fn(when)){
     memoize_if_applicable(when)
@@ -162,6 +148,33 @@ const dot_if=({when,then,data})=>{
     return then 
   }
   return data//no match
+}
+const dot_if=({args,data})=>{
+  if(args.length==2){
+    return when_then({when:args[0],then:args[1],data})
+  }
+  if(args.length==1
+    &&is_object(args[0])
+    &&is_condition_block(args[0])){
+    let rv = process_condition_block(args[0],data)
+    /**console.log({
+      data,
+      if_else_rv:rv,
+      rv_a_fn   :is_fn(rv),
+      unchanged :data===rv
+    })/**/
+    let unchanged=data===rv
+    if(unchanged)return data
+    if(is_fn(rv)){//already memoized in process_condition_block
+      return call_a_function(rv,data,[])
+    }
+    return rv
+  }
+  error(`.if block incorrect`)
+   
+  return data
+
+  
 }
 function make_proxy({seed,fns}){
   //Private data per chute
@@ -213,7 +226,7 @@ function make_proxy({seed,fns}){
       let key_without_parens=keys.length>1&&i!==last_key
       if(key_without_parens){
         if(key=='log')console.log(get_data())
-        else if(key=='if')error('.if needs 2 arguments')
+        else if(key=='if')error('.if needs 1-2 arguments')
         else if(key=='tap')error('.tap needs 1 fn argument')
         else if(key==='do')error('.do needs 1+ arguments')
         else if(is_number(Number(key))){
@@ -242,9 +255,7 @@ function make_proxy({seed,fns}){
           }
         }
         else if(key=='if'){
-          set_data(
-            dot_if({when:a[0],then:a[1],data:get_data()})
-          )
+          set_data(dot_if({args:a,data:get_data()}))
         }
         else if(key=='tap'){
           if(is_fn(a[0])) a[0](get_data())

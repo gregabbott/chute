@@ -86,11 +86,17 @@ margin-left:var(--rad);
 	border: 0;
 	background-color: transparent;
 }
-#show_example_use{
 
+.column{
+  width: 68ch;/*64 + 2ch inner left right*/
+  max-width: 100dvw;
+  padding: 4ch 2ch;
+  margin: 0 auto;
+  display: block;
+}
+#show_example_use{
+  width: 100%;
   white-space: pre-wrap;
-  white-space-collapse: auto;
-  
 }
 .hljs-comment {
   /*font-family: var(--sans);*/
@@ -109,10 +115,11 @@ main {
   overflow-y:auto;
   display: flex;
   margin: 0 auto;
-  width: 68ch;/*64 + 2ch inner left right*/
-  max-width: 100dvw;
+ 
+  width: 100dvw;
   flex-direction: column;
-  padding: 4ch 2ch;
+  
+  overflow-y: auto;
 }
 body{
   width: 100dvw;

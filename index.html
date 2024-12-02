@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="c.css">
 <link rel="stylesheet" href="highlight_theme.css">
 <script src="highlight.11.7.0.min.js"></script>
-<script src="chute.min.js"></script>
+<script src="chute.js"></script>
 <title>Chute &mdash; Chain Functions AND Native Methods in Vanilla JavaScript</title>
 </head>
 <body>
@@ -30,13 +30,13 @@
  Language: Vanilla JavaScript
 
 Version 1: 2024-11-27
-  Version: 2024-12-01
+  Version: 2024-12-02.1
            <a href=log.html>Log</a>
 
      View: <a href=chute.js>chute.js</a>
 
-     Save: <a download href=chute.js>Normal</a> (8KB)
-           <a download href=chute.min.js>Minified</a> (2KB)
+     Save: <a download href=chute.js>Normal</a> (9KB)
+           <a download href=chute.min.js>Minified</a> (3KB)
    
     Links: <a href="https://github.com/gregabbott/chute">GitHub</a>
 
@@ -57,12 +57,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 </div>
 </pre>
 </div><!--end about popover-->
+<div class="column">
 <p>Chute chains functions and method calls in vanilla JavaScript.</p>
 <pre id="show_example_use"></pre>
+</div>
 </main>
 <footer>
   <span title='copyright Greg Abbott 2024'>
-    By and <button popovertarget="popover_license">&copy; 2024</button> <a href="https://gregabbott.pages.dev/">Greg Abbott</a></span> | <a href="https://ko-fi.com/gregabbott">KoFi</a> | <a href="https://buymeacoffee.com/gregabbott">Buy Me A Cofee</a>
+    <button popovertarget="popover_license">By and &copy;</button> 2024 <a href="https://gregabbott.pages.dev/">Greg Abbott</a></span> | <a href="https://ko-fi.com/gregabbott">KoFi</a> | <a href="https://buymeacoffee.com/gregabbott">Buy Me A Cofee</a>
 </footer>
 <!-- if comments on same line as content,
 can hide them whitespace appearing-->
@@ -145,41 +147,37 @@ const example_1 = chute(//Call chute.
 //e.g. ".fn(a,b)" == "data = fn(user provided arguments)(data)"
 //==============================================================
 //BUILT IN METHODS
-//------------------------------------------------------------
+//--------------------------------------------------------------
 //LOG 
 //The built in method ".log()" logs the current data.
 .log
 //If it receives any arguments, it logs these before the data.
 .log('Log with note')
-//------------------------------------------------------------
+//--------------------------------------------------------------
 //TAP
 //".tap" calls a built in method that takes one function.
 //Chute sends the data to function, ignoring any return value.
 .tap(mutate)//A ".tap" function might mutate data directly.
 .log('Post-tap data')
-//------------------------------------------------------------
-//IF (basic)
-//'.if' calls a built in method that takes 2 arguments.
-//Argument 1 takes a value [e.g. "is_saturday()"] or a function.
-//Chute sends the data through any function and uses the result.
-//".if(test_fn,arg_2)" == "if(test_fn(data)){data = arg_2}"
+//--------------------------------------------------------------
+//IF
+//'.if' changes the current data based on specified conditions.
 
-//A truthy argument 1 value leads Chute to evaluate argument 2.
+//---- (A) If this, then that ----------------------------------
+//An "If this, then that" ".if" call takes 2 arguments.
+//Argument 1 can hold a function or value, e.g. "is_monday()".
+//Chute sends the current data to any argument 1 function.
+//The function returns a truthy or falsey value.
+
+//A truthy condition lets Chute looks at the second argument.
 //If argument 2 holds a value, it replaces the chute data.
-//If it holds a function, Chute sends the current data to it.
-//The function return value replaces the chute data.
+//If argument 2 holds a function, Chute sends the data to it.
+//The chute resumes with whatever data the function returns.
+
 .if(is_array,sum)
 .log('Sum: ')
-//The data remains the same when a condition proves falsey.
-//==============================================================
-//Inline functions
-//One alternative to the current value token (detailed below).
-(x=>x*3)//Anything at all
-.log("Tripled")
-//==============================================================
-//IF ELSE BLOCK (usable within ".do" calls.) 
-//(A placeholder implementation - changes planned)
 
+//---- (B) if, else if, else -----------------------------------
 //Shape:
 //The If Else block needs an object with an "if" property.
 //The "if" property must hold a 2 item array.
@@ -201,8 +199,8 @@ const example_1 = chute(//Call chute.
 //and keeps whatever that function returns as the new data.
 
 //With no 'else' property and no match, the data stays the same.
-({
-  if: [is_array, 8],
+.if({
+  if: [is_array, true],
   /*optional parts:*/
   else_if: [
     [is_string, 16             ],
@@ -226,8 +224,12 @@ const example_1 = chute(//Call chute.
     return 41
   }
 })*/
-//Chute remembers non-global functions mentioned in if blocks:
-.local_scope_x10
+.local_scope_x10()//Chute remembers non-globals from .if calls.
+//==============================================================
+//Inline functions
+//One alternative to the current value token (detailed below).
+(x=>x*3)//Anything at all
+.log("Tripled")
 //==============================================================
 .toString
 //Index number access. 
@@ -248,7 +250,7 @@ log(`Chute Result:`,example_1)
 //Calls in the chute can then reference the variable as needed.
 
 let x //any desired name for the "current value token"
-const chute_2 = chute().with(v=>x=v)//.with after call to chute
+const chute_2_result = chute().with(v=>x=v)//.with after call to chute
 ({two:2,four:4,eight:8})//initial chute value
 //The token can now be used in calls
 //Access current data property
@@ -263,7 +265,7 @@ const chute_2 = chute().with(v=>x=v)//.with after call to chute
 ([48,64,80,parseInt(x)])//Array literal
 //`.do` may call any of the above calls for the same result.
 ()
-log('chute_2 result',x)
+log('chute_2 result',chute_2_result)
 //Demo Helper Functions (Non-Global)
 function local_push(...a){return l=>(l.push(...a),l)}
 function local_unary(f){log('Local Unary');return f}
