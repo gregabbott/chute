@@ -5,32 +5,48 @@
 <meta name=color-scheme content="dark light">
 <link rel=icon href=data:;base64,iVBORw0KGgo=>
 <link rel="stylesheet" href="c.css">
+<link rel="stylesheet" href="highlight_theme.css">
 <script src="highlight.11.7.0.min.js"></script>
 <script src="chute.min.js"></script>
 <title>Chute &mdash; Chain Functions AND Native Methods in Vanilla JavaScript</title>
 </head>
 <body>
-<b>CHUTE - Chain Functions AND Native Methods</b>
-  <pre>
+  <input id="hide_comments" type="checkbox" hidden>
+  <header>
+    <div>
+      <button popovertarget="popover_about">Menu</button>
+    </div>
+    <div>
+      <button popovertarget="popover_about">CHUTE.js</button><br>
+    </div>
+    <div>
+      <label for="hide_comments" id="hide_comments_label">Toggle Notes</label>
+    </div>
+  </header>
+<main>
 
+<div id="popover_about" popover>
+  <pre>
  Language: Vanilla JavaScript
+
 Version 1: 2024-11-27
   Version: 2024-12-01
-     View: <a href=chute.js>Normal</a>
- Download: <a download href=chute.js>Normal</a> (8KB)
+           <a href=log.html>Log</a>
+
+     View: <a href=chute.js>chute.js</a>
+
+     Save: <a download href=chute.js>Normal</a> (8KB)
            <a download href=chute.min.js>Minified</a> (2KB)
-   Notice: <span title='copyright Greg Abbott 2024'>By and &copy; <a href="https://gregabbott.pages.dev/">Greg Abbott</a> 2024</span>
-    Links: <a href=log.html>Log</a>
-           <a href="https://github.com/gregabbott/chute">GitHub</a>
+   
+    Links: <a href="https://github.com/gregabbott/chute">GitHub</a>
+
   License: <button popovertarget="popover_license">MIT</button>
 </pre>
+</div><!--end about popover-->
 
 <div id="popover_license" popover><pre>
-CHUTE 
-License for the chute.js script and minified variants.
-
+The chute.js script License
 The MIT License
-
 Copyright (c) 2024, <a href=https://gregabbott.pages.dev>Greg Abbott</a>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -38,52 +54,40 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-</pre></div>
-<style>
-  pre code.hljs{display:block;overflow-x:auto;}
-  /*!
-    Theme: GitHub Dark
-    Description: Dark theme as seen on github.com
-    Author: github.com
-    Maintainer: @Hirse
-    Updated: 2021-05-15
-  
-    Outdated base version: https://github.com/primer/github-syntax-dark
-    Current colors taken from GitHub's CSS
-  */.hljs{color:#c9d1d9;background:#000000}.hljs-doctag,.hljs-keyword,.hljs-meta .hljs-keyword,.hljs-template-tag,.hljs-template-variable,.hljs-type,.hljs-variable.language_{color:#ff7b72}.hljs-title,.hljs-title.class_,.hljs-title.class_.inherited__,.hljs-title.function_{color:#d2a8ff}.hljs-attr,.hljs-attribute,.hljs-literal,.hljs-meta,.hljs-number,.hljs-operator,.hljs-selector-attr,.hljs-selector-class,.hljs-selector-id,.hljs-variable{color:#79c0ff}.hljs-meta .hljs-string,.hljs-regexp,.hljs-string{color:#a5d6ff}.hljs-built_in,.hljs-symbol{color:#ffa657}.hljs-code,.hljs-comment,.hljs-formula{color:#8b949e}.hljs-name,.hljs-quote,.hljs-selector-pseudo,.hljs-selector-tag{color:#7ee787}.hljs-subst{color:#c9d1d9}.hljs-section{color:#1f6feb;font-weight:700}.hljs-bullet{color:#f2cc60}.hljs-emphasis{color:#c9d1d9;font-style:italic}.hljs-strong{color:#c9d1d9;font-weight:700}.hljs-addition{color:#aff5b4;background-color:#033a16}.hljs-deletion{color:#ffdcd7;background-color:#67060c}
-  </style>
-
-
-<details open><summary>Example use</summary>
-
-<pre><code id="show_example_use"></code></pre>
-
-</details>
+</div>
+</pre>
+</div><!--end about popover-->
+<p>Chute chains functions and method calls in vanilla JavaScript.</p>
+<pre id="show_example_use"></pre>
+</main>
+<footer>
+  <span title='copyright Greg Abbott 2024'>
+    By and <button popovertarget="popover_license">&copy; 2024</button> <a href="https://gregabbott.pages.dev/">Greg Abbott</a></span> | <a href="https://ko-fi.com/gregabbott">KoFi</a> | <a href="https://buymeacoffee.com/gregabbott">Buy Me A Cofee</a>
+</footer>
+<!-- if comments on same line as content,
+can hide them whitespace appearing-->
 <script defer id="example_use">
 demonstrate_scope()
 function demonstrate_scope(){
-const example_1 = chute(
-  //Set up a chute with a seed value
-  [1, 2, 4],
-  //Optionally include any first functions to send data through
-  global_push(8) //fn2, fn3, fn4… (works like f2(f1(data)) etc.)
-)
+//==============================================================
+//SETUP CHUTE
+const placeholder = chute.x//An optional step for a demo below.
+const example_1 = chute(//Call chute.
+  [1, 2, 4],//Give it a seed
+  global_push(8)//Optionally send it through functions here.
+)//Swap over to dot-style chaining when it suits:
 //==============================================================
 //CALL METHODS
-// Method calls native to the current data work as normal.
-.map(double)
+.map(double)//Call any methods native to the current data.
 .filter(greater_than(4))
-//Methods that need no argument need no parentheses.
-.reverse
-.push(6)//.push returns the updated data to continue the chute.
-.forEach(x=>log(`Side FX: ${x}`))
-//The chute resumes after .forEach
+.reverse//Methods that need no argument need no parentheses.
+.push(6)//`.push` returns the updated data to the chute.
+.forEach(x=>log(`SideFx: ${x}`))//chutes resumes after .forEach.
 //==============================================================
 //CALL GLOBAL FUNCTIONS
 //------------------------------------------------------------
-//Call Global Functions Via Named Calls (method chain style)
-//".f_name()" calls any global function named "f_name".
+//Call Global Functions Via Dot-Style Calls
+//".f_name()" calls any global function found named "f_name".
 //If chute sees no arguments, it sends the data as argument 1.
 //".f_name()" or ".f_name" act like "data = f_name(data)"
 .wrap_in_array
@@ -105,7 +109,7 @@ const example_1 = chute(
 //This allows for passing in non-global functions, as above.
 (local_unary)//Non-global functions must use do to begin with.
 //Chute remembers each named non-global function it receives,
-//and makes it available to call method style after that point.
+//and makes it available to call dot-style after that point.
 .local_unary//The above call let Chute '.call' this non-global.
 //------------------------------------------------------------
 //The call inside the call below returns an unnamed function.
@@ -114,7 +118,7 @@ const example_1 = chute(
 //then forgets the function which lacks a name to call it by.
 //==============================================================
 //ORDER
-//Chute evaluates what to do per method-style call it receives.
+//Chute evaluates what to do per dot-style call it receives.
 //Chute checks the called name against names of other actions.
 //If nothing matches, Chute returns an error.
 //Otherwise it calls the first item found with the same name.
@@ -124,25 +128,26 @@ const example_1 = chute(
   //A global function.
   //A named non-global function (from some previous call).
 //==============================================================
-//ARGUMENT PLACEHOLDER (For ".function_name()" style calls)
-//Chute uses a placeholder (property 'x' of the function name),
-//to give functions the current data at a set argument position.
-.placeholder_test("see data in console ->",chute.x)
+//ARGUMENT PLACEHOLDER
+//Chute's 'x' property holds a placeholder to give dot-style
+//function calls the current data, at a set argument position.
+//To give an example of custom naming the placeholder to suit,
+//this script set it up as `const placeholder = chute.x`.
+.placeholder_test("see data in console ->",placeholder)
 //The above call equates to: "data = fn(string, current_data)".
 
-//Per named function call, Chute looks through each argument,
+//Per dot-style function call, Chute look at each argument,
 //and swaps any placeholder it finds for the current data.
 
 //When a .function call has arguments but no data placeholder,
 //Chute expects the function call to return another function.
 //It then sends the data to that function, keeping the result.
 //e.g. ".fn(a,b)" == "data = fn(user provided arguments)(data)"
-//This pattern goes well with Chute `({named parameters})(data)`
 //==============================================================
 //BUILT IN METHODS
 //------------------------------------------------------------
 //LOG 
-//The built in ".log()" method logs the current data.
+//The built in method ".log()" logs the current data.
 .log
 //If it receives any arguments, it logs these before the data.
 .log('Log with note')
@@ -229,12 +234,11 @@ const example_1 = chute(
 [0]//The value of this item becomes the chute data.
 //==============================================================
 //ENDING THE CHUTE
-//Any named call preceding the chain end needs parentheses '()'.
-.log()//[<- Design under consideration]
-()//<- An empty call returns the data value and ends the chute.
-//From this point, method calls directly act on the data.
-.toString()
+.log()//This dot style call needs parentheses '()',
+()//so that a final empty call can returns the data value.
+.toString()//Regular method calls can act on the returned data.
 .replace(/$/,'!')
+
 log(`Chute Result:`,example_1)
 
 //==============================================================
@@ -271,7 +275,7 @@ function placeholder_test(a,x){log(a,x);return x}
 function extract_quoted(x){return x.replace(/.*?"(.*?)"/,'$1')}
 function get_index(i){return data => data[i]}
 function wrap_in_array(data){return [data]}
-function global_push (...a){return l => {l.push(...a);return l}}
+function global_push (...a){return l=>{l.push(...a);return l}}
 function log (...x){console.log(...x);return x}
 function greater_than(n){ return x => x > n}
 function double(x){return x * 2}
@@ -288,6 +292,7 @@ window.addEventListener('load', ()=>{
       document.getElementById('example_use').textContent,
       { language: 'javascript' }
     ).value
+    .replace(/>\/\/ */g,'> ')
 })
 </script>
 </body>

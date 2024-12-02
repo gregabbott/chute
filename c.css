@@ -1,6 +1,3 @@
-code{
-  white-space: pre;
-}
 textarea{
   width: 100dvw;
   height: 40dvh;
@@ -15,6 +12,67 @@ textarea{
 	--fg:light-dark(var(--dark),var(--light));
   --border: 1px solid var(--fg);
   --line_height:120%;
+  --sans: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --rad:3px;
+}
+header, header *,footer, footer *{
+  user-select: none;
+}
+header {
+  display: flex;
+  flex-direction: row;
+  padding: 1ch;
+  div {
+    align-self: center;
+    width: 33.3333%;
+    text-align: center;
+  }
+  div:first-of-type{
+    text-align: left;
+  }
+  div:last-of-type{
+    text-align: right;
+  }
+  text-align: center;
+  border-bottom: var(--border);
+  button {
+    border: 1px dashed var(--fg);
+    padding: 2px;
+    &:hover{
+      border: var(--border);
+    }
+  }
+}
+footer {
+  width: 100dvw;
+  align-self: center;
+  border-top: var(--border);
+  text-align: center;
+  padding: .5ch 1ch;
+  button {
+    padding: 2px;
+    border: 1px dashed var(--fg);
+  }
+  *{
+    font-size: small;
+  }
+}
+body:has(#hide_comments:checked)  .hljs-comment{
+  display: none;
+  white-space: normal;
+}
+#hide_comments_label {
+  border: var(--border);
+  padding: 0 var(--rad);
+}
+body:has(#hide_comments:checked) #hide_comments_label::after{
+  content: "Y";
+}
+#hide_comments_label::after{
+content: 'N';
+border-left: var(--border);
+padding: 0 var(--rad);
+margin-left:var(--rad);
 }
 *{
 	outline:none;
@@ -28,35 +86,63 @@ textarea{
 	border: 0;
 	background-color: transparent;
 }
+#show_example_use{
+
+  white-space: pre-wrap;
+  white-space-collapse: auto;
+  
+}
+.hljs-comment {
+  /*font-family: var(--sans);*/
+  color: var(--fg);
+}
+.hljs-title, .hljs-property, .function_{
+  font-weight: bold;
+}
+.hljs-string {
+ /* font-family: var(--sans);*/
+}
+main {
+  flex:1;
+  overflow-y:auto;
+  display: flex;
+  margin: 0 auto;
+  width: 68ch;/*64 + 2ch inner left right*/
+  max-width: 100dvw;
+  flex-direction: column;
+  padding: 4ch 2ch;
+}
 body{
+  width: 100dvw;
+  height: 100dvh;
   background-color: var(--bg);
  color: var(--fg);
-  padding: 2ch;
-  max-width: 68ch;/*64 + 2ch inner left right*/
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
 }
 @media (prefers-color-scheme: light) {
-  pre code.hljs {
+  pre .hljs {
         filter: invert(1);
     }
 }
 a,a:visited{
 color: var(--fg);
 }
+
+
 [popover]{
 	/*default*/
 	position: fixed;
   inset: 0;
-  
   height: fit-content;
   margin: auto;
-  border: solid;
+  border-radius: var(--rad);
   padding: 0.25em;
   overflow: auto;
 	/*custom*/
   background-color: var(--bg);
-	
-	width: 66ch;
+	width: calc(68ch + 4px);
 	min-height: 6ch;
 	border: 2px solid var(--fg);
 	padding: 2ch;
@@ -68,11 +154,10 @@ color: var(--fg);
 	pre{
 		white-space: pre-wrap; 
 	}
-	button{
-    width: 100%;
-		display: block;
-    margin-bottom: 2px;
-	}
+
+}
+button {
+  border-radius: var(--rad);
 }
 summary{
   user-select: none;
