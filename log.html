@@ -1,20 +1,85 @@
-<a href="index.html">CHUTE</a> BY + (C) 2024 <a href="https://gregabbott.pages.dev/">GREG ABBOTT</a>
+<!DOCTYPE html>
+<html lang=en>
+<head>
+<meta charset=utf-8>
+<meta name=color-scheme content="dark light">
+<style>
+:root{
+	color-scheme: light dark;
+  --light: hsl(60, 25%, 95%);
+  --dark: hsl(15, 5%, 10%);
+	--base_size:13px;
+	--bg:light-dark(var(--light),var(--dark));
+	--fg:light-dark(var(--dark),var(--light));
+}
+a {
+  color: var(--fg);
+}
+* {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: monospace;
+  box-sizing: border-box;
+}
+body {
+  width: 100vw;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  font-size: 15px;
+  line-height: 150%;
+}
+header,
+footer {
+  width: 100vw;
+  padding: 1ch;
+  text-align: center;
+}
+header {
+  border-bottom: 1px solid var(--fg);
+}
+footer{
+  border-top:  1px solid var(--fg);
+}
+footer, footer *{
+  font-size: 9px;
+}
+main {
+  flex:1;
+  overflow-y:auto;
+  display: flex;
+}
+pre {
+  margin: 0 auto;
+}
+</style>
+<title>Monotext Changelog</title>
+</head>
+<body>
+  <header>
+    <a href="index.html">CHUTE</a> CHANGE LOG
+  </header>
+<main><!-- New dates at top. per date first change at top-->
 <pre>
-# CHANGES
 # 2024_12_03
-Unifies documentation formatting.
-Adds noscript message.
-Demonstrates access to global nested non-native functions.
-Updates styles.
-Adds example of using Chute with DOM.
-Adds access to custom / non-native methods of current data.
-Looks within current data for nested functions.
-Uses .call to give Fns nested in current data needed context:
-  Some things like el.classList.add lose context otherwise.
-Refactors .with to take a settings object.
-Syncs the current value to a variable using .token property.
-Adds "skip_void" to continue with data if a Fn gives undefined.
-Revises handling of access index feature "[0]".
+SCRIPT
+  Adds access to custom / non-native methods of current data.
+  Looks within current data for nested functions.
+  Uses .call to give Fns nested in current data needed context:
+    Some things like el.classList.add lose context otherwise.
+  Refactors chute .with method to take a settings object.
+  Syncs the current value to a variable using .token property.
+  Adds "skip_void" setting to ignore undefined function returns
+  Revises handling of access index feature "[0]".
+DOCS
+  Unifies documentation formatting.
+  Demonstrates access to global nested non-native functions.
+  Adds example of using Chute with DOM.
+SITE
+  Adds noscript message.
+  Updates styles.
+  Basic styling for log.
 
 # 2024_12_02
 Styles site minimally.
@@ -58,3 +123,9 @@ Adds chain calling without parentheses e.g. '.log.reverse.log'
 # 2024-11-27
 V1
 </pre>
+</main>
+<footer>
+Chute By + &copy; 2024 <a href=https://gregabbott.pages.dev>Greg Abbott</a>
+</footer>
+</body>
+</html>
