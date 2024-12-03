@@ -2,9 +2,9 @@ function demonstrate_scope(){
 // =============================================================
 // SETUP CHUTE
 const placeholder = chute.x// An optional step for a demo below.
-const chute_1 = chute(// Call chute.
-  [1, 2, 4],// Give a seed value to send through functions.
-  global_push(8)//, f2, f3… Optional first functions.
+const chute_1 = chute(// Call chute to create a new chute.
+  [1, 2, 4],// Optionally seed the chute in the initial call.
+  global_push(8)//,f2,f3… <- Optional first functions to run.
 )// Swap over to dot-style chaining when it suits:
 // =============================================================
 // CALL METHODS
@@ -12,7 +12,7 @@ const chute_1 = chute(// Call chute.
 .filter(greater_than(4))
 .reverse()
 .push(6)// ".push" returns the updated data to the chute.
-.forEach(x=>log(`SideFx: ${x}`))// chutes resumes after .forEach.
+.forEach(x=>log(`SideFx: ${x}`))// .forEach returns its input.
 // =============================================================
 // CALL GLOBAL FUNCTIONS
 // ------------------------------------------------------------
@@ -26,8 +26,8 @@ const chute_1 = chute(// Call chute.
 // Call Any Functions Via ".do" Calls (Sub-chains)
 // ".do" sends data through 1+ functions in a single call.
 // ".do(f1,f2)" sends data to f1, then f1's return to f2.
-.do(global_push(32),local_push(64)/*etc*/)
-// Nameless calls work as ".do" calls without the key.
+.do(global_push(32),local_push(64)/*etc.*/)
+// Nameless calls work the same as ".do" calls without the key.
 (local_unary,global_push(128,250))
 // sub-chains use reduce to mimic nested calls
   // ".do(f1,f2)" works like "f2(f1(data))"
@@ -55,22 +55,22 @@ const chute_1 = chute(// Call chute.
   // A named non-global function (from some previous call).
 // =============================================================
 // ARGUMENT PLACEHOLDER
+// NOTE: This point relates to .some_fn() not .method_of_data().
 // Chute's "x" property holds an immutable placeholder object.
-// It gives the current data at specific argument positions, 
-// in dot-style function calls.
+// Dot-style function calls can place it in argument positions.
+// Chute swaps out placeholders it finds for the current data.
 
 // This script has the set up "const placeholder = chute.x",
 // to give an example of custom naming the placeholder to suit.
 .placeholder_test(`see data in console ->`,placeholder)
 // The above call equates to: "data = fn(string, current_data)".
 
-// Per dot-style function call, Chute look at each argument,
-// and swaps any placeholder it finds for the current data.
-
-// When a .function call has arguments but no data placeholder,
+// When a call of this kind has arguments but no placeholder,
 // Chute expects the function call to return another function.
-// It then sends the data to that function, keeping the result.
-// e.g. ".fn(a,b)" == "data = fn(user provided arguments)(data)"
+// It sends the data to that returned function.
+// e.g. ".fn(a,b)" == "data = fn(arguments but none data)(data)"
+
+// SEE: "current value token" for a similar but different idea.
 // =============================================================
 // LOG 
 // The built in method ".log()" logs the current data.
@@ -157,10 +157,10 @@ const chute_1 = chute(// Call chute.
 .toString()
 [0]// ACCESS INDEX via [\d+] to make it the chute data,
 .log('Accessed Index Equals: ')
+.replace(/$/,`!`)
 // =============================================================
 ()// END THE CHUTE with an empty call to return the current data
-.toString()// Then act on data directly if needed
-.replace(/$/,`!`)
+// Further method calls would act on data directly.
 
 log(`chute_1 result:`,chute_1)
 
@@ -171,9 +171,10 @@ log(`chute_1 result:`,chute_1)
 // which Chute updates with the current data as it runs.
 // Calls within the chute can reference the variable as needed.
 let x // any desired name for the "current value token".
-const chute_2_result = chute()//Call Chute
-.with({token:v=>x=v})//.with call setups current value token.
-({two:2,four:4,eight:8})// Seed value (if not in chute() call)
+const chute_2 = chute()//Call new chute. Give/omit seed and fns.
+.with({token:v=>x=v})//Configure with current value token.
+({two:2,four:4,eight:8})// Seed configured chute.
+// DO CALLS WITH EXPRESSIONS USING CURRENT VALUE TOKEN
 (x.eight) // PROPERTY ACCESSS   Instead of "(x=>x.eight)"
 (x + 10)// ARITHMETIC           Instead of "(x=>x+10)"
 ({data:x})// OBJECT LITERALS    Instead of "(x=>{data:x})"
@@ -182,18 +183,18 @@ const chute_2_result = chute()//Call Chute
 ([48,64,80,parseInt(x)])// ARRAY LITERAL
 ()//End the chute
 
-log(`chute_2 result:`,chute_2_result)
+log(`chute_2 result:`,chute_2)
 // =============================================================
-// THE "skip_void" SETTING [Design under consideration]
+// THE "skip_void" SETTING
 // Chute has a setting called "skip_void" to handle "undefined".
 // When enabled, if a function in a chute returns undefined,
 // Chute ignore it, and continues with the data it already had.
-// I.E. "let x = fn(data); return x !== undefined ? x : data"
+// I.E. "let x = fn(data); return x === undefined ? data : x"
 // When disabled, the chute makes undefined its new value.
 // "skip_void:true" lets a chute continue in more cases.
 
-  let chute_3 = chute()//New chute and setup:
-  .with({skip_void:true})//default: false
+  let chute_3 = chute()//New chute.
+  .with({skip_void:true/*default: false*/})//Chute settings.
   ({//The chute call or a later call can contain the seed value.
     tag:`div`,
     parent:`dom_example`
@@ -207,10 +208,9 @@ log(`chute_2 result:`,chute_2_result)
   })
   .classList.add(`round_button`)//This method returns undefined.
   .log('now')//The chute still has the element.
-  ()//End the chute
+  ()//End chute. If at the Chute page, find the element below.
   
   log(`chute_3 result:`,chute_3)//Chute end value.
-  //Note: If viewing the Chute page, find this element below.
 
   // Demo Helper Functions (Non-Global)
   function local_push(...a){return l=>(l.push(...a),l)}

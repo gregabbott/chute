@@ -65,7 +65,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 </div><!--end about popover-->
 <div class="column">
 <p>Chute chains functions and method calls in vanilla JavaScript.</p>
-<pre id="show_example_use"></pre>
+<pre id="show_example_use" class="hljs_block"></pre>
+<pre id="show_example_use_sans_comments" class="hljs_block"></pre>
 <div id="dom_example"></div>
 </div>
 </main>
@@ -79,9 +80,20 @@ function show_js(){
   fetch('demo.js')
   .then(response => response.text())
   .then(s=>{
+    let with_comments = s
     document.getElementById('show_example_use').innerHTML=
-      hljs.highlight(s,{ language: 'javascript' }).value
-      .replace(/>\/\/ */g,'>')
+      hljs.highlight(with_comments,{ language: 'javascript' })
+      .value
+      //.replace(/>\/\/ */g,'>')
+
+    let sans_comments= s
+    .replace(/([^\:])\/\/ *.*/g,'$1')
+    .replace(/\n\s*\n+/g,'\n')  
+    document
+      .getElementById('show_example_use_sans_comments')
+      .innerHTML=
+      hljs.highlight(sans_comments,{ language: 'javascript' })
+      .value
   })
   .catch(e => console.error('Error fetching the script:', e))
 }

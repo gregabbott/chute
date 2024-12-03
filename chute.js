@@ -109,15 +109,15 @@ const void_returning_methods=new Set([
 ])
 const dot_style_call=(data,key,a)=>{
   // Dot-style call means chute has access to (or memoized) FN
-  if(is_fn(data[key])){//This IF considers any FN in data
-    //to only look at native methods use: is_js_method(data,key)
-     /**
+    /**
   console.log({
     n:'dot_style_call',
     data:data,//stringy(data),
     key,
     a
   })/**/
+  if(is_fn(data[key])){//This IF considers any FN in data
+    //to only look at native methods use: is_js_method(data,key)
     let rv = data[key](...swap_placeholders(a,data))
     return void_returning_methods.has(key)?data:rv
   }
