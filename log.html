@@ -1,12 +1,28 @@
 <a href="index.html">CHUTE</a> BY + (C) 2024 <a href="https://gregabbott.pages.dev/">GREG ABBOTT</a>
 <pre>
 # CHANGES
+# 2024_12_03
+Unifies documentation formatting.
+Adds noscript message.
+Demonstrates access to global nested non-native functions.
+Updates styles.
+Adds example of using Chute with DOM.
+Adds access to custom / non-native methods of current data.
+Looks within current data for nested functions.
+Uses .call to give Fns nested in current data needed context:
+  Some things like el.classList.add lose context otherwise.
+Refactors .with to take a settings object.
+Syncs the current value to a variable using .token property.
+Adds "skip_void" to continue with data if a Fn gives undefined.
+Revises handling of access index feature "[0]".
+
 # 2024_12_02
 Styles site minimally.
 Merges 'if this then that' and 'if else' block. Both via .if.
 Updates documentation.
 Splits demo JS to file. Uses fetch to show it on main page.
-Refactors to enforce parens on all calls except do. To enable:
+Refactors to enforce parens on all dot-style calls except [\d]
+  Calls do when no key given e.g ".log(<-key)(<-NoKey==DoCall)"
 Adds nested namespace path style calling e.g. .JSON.stringify().
 Documents calls to nested function and native methods.
 

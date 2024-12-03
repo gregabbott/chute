@@ -1,9 +1,8 @@
 const chute = (()=>{
 /* https://gregabbott.github.io/chute By + Copyright Greg Abbott
-[V1=2024-11-27][V=2024-12-02.2]*/
+[V1=2024-11-27][V=2024-12-03.1]*/
 const keys=[],
 stringy=x=>JSON.stringify(x),
-log=(...a)=>x=>(console.log(...a),x&&console.log(x),x),
 error=(...x)=>{throw new Error(x)},
 is_fn=x=>x instanceof Function,
 is_number=v=>typeof v ==='number'&&!isNaN(v),
@@ -12,10 +11,10 @@ is_object=v=>v&& typeof v=='object'&&!Array.isArray(v),
 is_js_method=(o,k)=>is_fn(Object.getPrototypeOf(o)[k]),
 is_global_fn=name=>is_fn(globalThis[name]),
 non_global_fns_encountered = new Map(),
-BOX=(seed,...fns)=>make_proxy({seed,fns}),//becomes `chute` FN
-//`chute(seed)` calls above, returns new chute, ready for calls
-PLACEHOLDER = {}//named call data argument position PLACEHOLDER
-BOX.x=PLACEHOLDER//for access by user via `(chute Fn name).x`
+PLACEHOLDER = {},//data argument position for dot-style Fn calls
+BOX=(seed,...fns)=>new_chute({seed,fns})//becomes `chute` FN
+//`chute(seed)` calls above, returns new chute ready for calls
+BOX.x=PLACEHOLDER//for access by user via `(chute_fn_name).x`
 function is_condition_block(o){
   //HAS {if:[q,a]} and any else_ifs [] filled with [q,a] pairs
   const keys = Object.keys(o),
@@ -33,16 +32,16 @@ function is_condition_block(o){
   return other_keys_count === 0 && optional_keys_count <= 2
 }
 function process_condition_block(c,data) {
-  //This method allows user to provide `undefined` explicitly 
   //Block won't pass as "if block" if a pair lacks Q or A value
-  //User may pass in non-globals Fns as questions AND answers
-  //memoize so user may .name call them later in chute.
+  //Code below allows a user to explicitly provide `undefined`.
+  //User may pass in non-global functions as Q's or A's.
+  //Memoize when possible, to allow dot-style calling later.
   [c.if,...c.else_if].forEach(([q,a])=>{
     if(is_fn(q))memoize_if_applicable(q)
     if(is_fn(a))memoize_if_applicable(a)
   })
   function evaluate({condition,data}){ 
-    if(is_fn(condition)){return condition(data)}//test data
+    if(is_fn(condition)){return condition(data)}
     return condition
   }
   //Return returnable of first truthy match
@@ -57,12 +56,11 @@ function process_condition_block(c,data) {
   if('else' in c){
     return c.else
   }
-  //No matches
-  return data
+  return data//No matches
 }
 function memoize_if_applicable(f){
   if(f.name && !is_global_fn(f.name)){
-  //Passed in non-global function, probably a unary
+  //Passed in named non-global function, probably a unary
     if(!non_global_fns_encountered.has(f.name)){
       //memoize, to allow DOT calls in this same chain
       non_global_fns_encountered.set(f.name,f)
@@ -84,40 +82,45 @@ function sub_chain_reducer(data,f){
   return f//likely a result of Token expression EG`.do(token*5)`
 }
 const sub_chain=(a,data)=>a.reduce(sub_chain_reducer,data)
+const call_a_function=(fn,data,a)=>{
+  if(a.length===0)return fn(data)
+  //has args
+  let processed_args=swap_placeholders(a,data)
+  if(processed_args!==a){//had placeholders
+    return fn(...processed_args)
+  }
+  //no placeholder for data in args
+  //expect this fn to return a fn to give data to
+  else{
+    return fn(...a)(data)
+  }
+}
+const swap_placeholders=(a,data)=>{
+  let has_placeholder = a.length>0&&a.indexOf(PLACEHOLDER)!==-1
+  if(has_placeholder){//replace any placeholders with data
+    return a.map(arg=>arg===PLACEHOLDER?data:arg)
+  }
+  return a
+}
 const void_returning_methods=new Set([
   'forEach',//no return
   'push',//returns new length
   'unshift',//as above
 ])
-const call_a_function=(fn,data,a)=>{
-  if(a.length===0)return fn(data)
-  let i = a.indexOf(PLACEHOLDER)
-  if(i!==-1){//has placeholder
-    a[i]=data//replace placeholder with data
-    return fn(...a)
-  }
-  else{
-    return fn(...a)(data)
-  }
-}
-const call_method_of_data=(data,key,a)=>{
-  // .not_a_chute_key()
-  // already memoized any fn this sees
-  if(is_js_method(data,key)){
-    let i = a.indexOf(PLACEHOLDER)
-    if(i!==-1){a[i]=data}//replace placeholder with data
-    let rv= data[key](...a)
-    return void_returning_methods.has(key)?data:rv
-  }
-  /*
+const dot_style_call=(data,key,a)=>{
+  // Dot-style call means chute has access to (or memoized) FN
+  if(is_fn(data[key])){//This IF considers any FN in data
+    //to only look at native methods use: is_js_method(data,key)
+     /**
   console.log({
-    fn,
-    n:'call_method_of_data',
-    data:stringy(data),
+    n:'dot_style_call',
+    data:data,//stringy(data),
     key,
     a
-  })
-  /**/
+  })/**/
+    let rv = data[key](...swap_placeholders(a,data))
+    return void_returning_methods.has(key)?data:rv
+  }
   if(is_global_fn(key)){
     let fn = globalThis[key]
     return call_a_function(fn,data,a)
@@ -129,7 +132,7 @@ const call_method_of_data=(data,key,a)=>{
       a)
   }
   else {
-    error(`Data lacks "${key}" and not a global function`)
+    error(`"${key}" not in data nor a global function`)
     return data
   }
 }
@@ -164,62 +167,116 @@ const dot_if=({args,data})=>{
     })/**/
     let unchanged=data===rv
     if(unchanged)return data
-    if(is_fn(rv)){//already memoized in process_condition_block
+    if(is_fn(rv)){//memoized this FN in process_condition_block
       return call_a_function(rv,data,[])
     }
     return rv
   }
-  error(`.if block incorrect`)
+  error(`.if block incorrect`,args)
   return data
 }
 function handle_nested_access(keys_so_far,key,data,args){
+  keys_so_far.push(key)//Collect path
+  if(!args) return //Args follow final key in path
+  //Find root: (A) property of data; or (B) global object
+  let root=data[keys_so_far[0]]!==undefined?data:globalThis
+  let context//The level above the function, for `this` context.
   function check_path_and_get_item(){
     return keys_so_far.reduce((a,x,i)=>{
       if(a[x]!==undefined){
         a=a[x]
+        if(i<keys_so_far.length-1){//not last
+          context=a
+        }
         return a
       }
       else {
+        console.log(a[x])
         error(
-          `"${x}" not found at global path: "${
+          `"${x}" not found at path: "${root===globalThis?'GlobalThis':'CurrentData'}.${
             keys_so_far.join('.')}"`
         )
       }
-    },globalThis)
+    },root)
   }
-  keys_so_far.push(key)
-  let item = check_path_and_get_item()
-  if(data){//Final key and args
-    if(is_fn(item)){
-      /**console.log({
-     path: `${keys_so_far.join('.')}`,
-     fn:item,
-     data,
-     args
-    })
-    /**/
-      return call_a_function(item,data,args)
+  let fn = check_path_and_get_item()
+  if(is_fn(fn)){
+    //let o={root,path:keys_so_far.join('.'),fn,data,args}
+    //console.log(o)
+    if(root===data){
+      //Call a function the current data holds.
+        //e.g. `.classList.add` in a DOM element.
+      //Because data holds the FN:
+      //If 0 args, call with 0 args: Don't send data as arg 1.
+      //If 1+ args, args may hold data placeholder where needed.
+      return fn.call(context,...swap_placeholders(args,data))
+      //Reason for ".call": some functions lose context.
+        //e.g. if you separate ".add" from "classList.add"
+        //".add" on its own won't know what it should add to.
+      //using ".call" lets the function know the relevant object
     }
-    else return data
+    else{
+      //a call to a function in global namespace
+      //e.g. a_library.a_group.a_function
+      return call_a_function(fn,data,args)
+    }
   }
+  else return data
 }
-function make_proxy({seed,fns}){
+function new_chute({seed,fns}){
   //Private data per chute
   let data = null,
-    update_token_fn=null//lets user access running chute data
+    with_received=false,
+    sync_data=null,//Chute sends current data to any FN given
+    //Takes a FN like: `chute_data=>out_of_scope_variable=chute`
+    //Which lets user access data mid-chute
+    skip_void=false//default if not given
   //set and get data allows easy change of data location
   const set_data=x=>{
   //console.log(`result of "${keys[0]||'nameless'}"`,x,typeof x)
-    if(update_token_fn/*provided*/){update_token_fn(x)}
+    if(skip_void/*avoid saving if*/&&x===undefined)return
+    if(sync_data/*provided*/){sync_data(x)}
     data=x
   },
   nested_access=[],
   get_data=()=>data,
   target=()=>{}
-  function get(target,k){
-    //chute._=data//give access
-    keys.push(k)
+  function get(target,key){
+    //chute._=data//for wider access
+    if(is_number(Number(key))){//(vs HAS a number) //GET INDEX
+      //dot-style calls don't allow leading digits: ".0"
+      //user may attempt to access data index with brackets: [0]
+      //If so, expect no arguments. Set data to value of index.
+      set_data(get_data()[key])
+      //Treat any '()' with arguments after [\d] as a .do call
+        //in apply fn: set_data(sub_chain(a,get_data()))
+      return proxy
+    }
+    keys.push(key)
     return proxy
+  }
+  function handle_dot_with(a){
+    if(with_received)error(`1 with per chute`)
+    with_received=true
+    if(a.length!==1||!is_object(a[0])){
+      error('.with accepts 1 object for settings')
+    }
+    //settings object
+    a=a[0]
+    if(a.token){
+      if(is_fn(a.token)){
+        sync_data=a.token
+        //Token needs a value to work.
+        //User may have put `let x;`
+        sync_data(data)
+      }
+      else{
+        error('token accepts `v=>your_variable=v`')
+      }
+    }
+    if(a.skip_void){//accept truthy
+      skip_void=Boolean(a.skip_void)//default false
+    }
   }
   function apply(target,_, a){
     /**console.log({
@@ -232,7 +289,7 @@ function make_proxy({seed,fns}){
       if(a.length===0){//E.G. `.log()()` Empty call ends chute
         return get_data()
       }
-      else{//EG .log()/*no key*/(<-nameless do call)(<-another)
+      else{//EG .log()/*no key*/(<-nameless .do call)(<-another)
         set_data(sub_chain(a,get_data()))
         return proxy
       }
@@ -247,10 +304,6 @@ function make_proxy({seed,fns}){
         //`()` may contain arguments for that most recent key.
       //On apply, Chute goes through each stored `.name_call`.
       //It performs appropriate action based on the exact call.
-      //GET INDEX
-      //When user types [0], this takes no arguments
-      //As no function or method will start with or == a number,
-      //Chute can treat as instruction to make data this value.
       let key_without_parens=keys.length>1&&i!==last_key
       if(key_without_parens){
         if(key=='log')error('.log needs parens')
@@ -261,30 +314,17 @@ function make_proxy({seed,fns}){
           set_data(get_data()[key])
         }
         else if(key){
-          //e.g key 1 == `JSON`, key 2 == 'stringify' then "()"
+          //e.g k1 == `JSON`, k2 == 'stringify' then "()"
           //handling item in path before method
           //method == string before ()
-          handle_nested_access(nested_access,key)//a.b.c()
+          handle_nested_access(nested_access,key,get_data())//a.b.c()
         }
         return rv
       }
       if(keys.length===1||i===last_key){
         if(key=='log'){console.log(...a,get_data())}
         else if(key=='with'){//Setup FN
-          if(update_token_fn!==null){
-            error('already set up. 1 with per chute')
-          }
-          else{
-            if(a.length!==1||!is_fn(a[0])){
-              error('with accepts v=>your_variable=v')
-            }
-            else{
-              update_token_fn=a[0]
-              //Token needs a value to work.
-              //User may have put `let x;`
-              update_token_fn(data)
-            }
-          }
+          handle_dot_with(a)
         }
         else if(key=='if'){
           set_data(dot_if({args:a,data:get_data()}))
@@ -296,13 +336,6 @@ function make_proxy({seed,fns}){
         else if(key==='do'){
           set_data(sub_chain(a,get_data()))
         }
-        else if(is_number(Number(key))){
-          //get index wanted
-          set_data(get_data()[key])
-          //Index access takes no arguments. (e.g. `[0]`)
-          //So any '()' with arguments after [\d] is a .do call
-          set_data(sub_chain(a,get_data()))
-        }
         else if(key){
           if(nested_access.length>0){//if .a.b.c() this == 'c()'
             set_data(
@@ -311,19 +344,18 @@ function make_proxy({seed,fns}){
             nested_access.length=0//Reset
           }
           else{//.something()
-            set_data(call_method_of_data(get_data(),key,a))
+            set_data(dot_style_call(get_data(),key,a))
           }
         }
-        keys.length=0//Processed all keys, reset array
+        keys.length=0//Processed all keys
       }
       return rv
     },proxy)
   }
   let proxy = new Proxy(target, {get,apply})
-  //Use any seed value initial `chute()` may have provided:
-    set_data(seed)
-  //Run data through any functions the initial chute call gave.
-    if(fns.length>0)set_data(sub_chain(fns,seed))
+    //chute() may have provided initial value and fns
+  set_data(seed)
+  if(fns.length>0)set_data(sub_chain(/*initial*/fns,seed))
   return proxy
 }
 return BOX

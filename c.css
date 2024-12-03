@@ -63,16 +63,36 @@ body:has(#hide_comments:checked)  .hljs-comment{
 }
 #hide_comments_label {
   border: var(--border);
+  border-radius: var(--rad);
+  overflow: hidden;
+  line-height: var(--line_height);
   padding: 0 var(--rad);
 }
+#hide_comments_label::after{
+  content: 'N';
+  line-height: var(--line_height);
+  border-left: var(--border);
+  padding: 0 var(--rad);
+  margin-left:var(--rad);
+  }
 body:has(#hide_comments:checked) #hide_comments_label::after{
   content: "Y";
 }
-#hide_comments_label::after{
-content: 'N';
-border-left: var(--border);
-padding: 0 var(--rad);
-margin-left:var(--rad);
+#please_enable_js, #please_enable_js * {
+  color: var(--bg);
+}
+#please_enable_js {
+	position: fixed;
+	background-color: var(--fg);
+	padding: 2ch;
+	top: 25%;
+	width: 100vw;
+	left: 0%;
+	z-index: 999;
+	height: auto;
+	max-width: 100vw;
+	text-align: center;
+	font-size: 16px;
 }
 *{
 	outline:none;
@@ -86,7 +106,9 @@ margin-left:var(--rad);
 	border: 0;
 	background-color: transparent;
 }
-
+a, a *{
+  color: var(--fg);
+}
 .column{
   width: 68ch;/*64 + 2ch inner left right*/
   max-width: 100dvw;
@@ -97,12 +119,15 @@ margin-left:var(--rad);
 #show_example_use{
   width: 100%;
   white-space: pre-wrap;
+  /*background-color: hsl(0, 0%, 96%);*/
 }
 .hljs-comment {
   /*font-family: var(--sans);*/
   color: var(--fg);
+  font-style: italic;
+  color: #444;
 }
-.hljs-title, .hljs-property, .function_{
+.hljs-title, .function_{
   font-weight: bold;
 }
 /*
@@ -115,10 +140,8 @@ main {
   overflow-y:auto;
   display: flex;
   margin: 0 auto;
- 
   width: 100dvw;
   flex-direction: column;
-  
   overflow-y: auto;
 }
 body{
@@ -131,15 +154,13 @@ body{
   flex-direction: column;
 }
 @media (prefers-color-scheme: light) {
-  pre .hljs {
-        filter: invert(1);
-    }
+  #show_example_use {
+    xfilter: invert(1);
+  }
 }
 a,a:visited{
 color: var(--fg);
 }
-
-
 [popover]{
 	/*default*/
 	position: fixed;
@@ -163,7 +184,6 @@ color: var(--fg);
 	pre{
 		white-space: pre-wrap; 
 	}
-
 }
 button {
   border-radius: var(--rad);
@@ -179,4 +199,13 @@ pre button {
 code.hljs {
   max-width: 100%;
   padding: 2ch;
+}
+.round_button{
+  background-color: var(--fg);
+  color: var(--bg);
+  border-radius: 20px;
+  width: auto;
+  user-select: none;
+  display: inline-block;
+  padding: 0 var(--rad);
 }

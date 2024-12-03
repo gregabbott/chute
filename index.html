@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="highlight_theme.css">
 <script src="highlight.11.7.0.min.js"></script>
 <script src="chute.js"></script>
-<script id="demoJS" src="demo.js"></script>
+<script defer src="demo.js"></script>
 <title>Chute &mdash; Chain Functions AND Native Methods in Vanilla JavaScript</title>
 </head>
 <body>
@@ -25,7 +25,12 @@
     </div>
   </header>
 <main>
-
+  <noscript>
+    <div id="please_enable_js">
+      This page introduces <a href=chute.js>chute.js</a>.<br>
+      It uses JavaScript to present the content of <a href=demo.js>demo.js</a>
+    </div>
+  </noscript>
 <div id="popover_about" popover>
   <pre>
  Language: Vanilla JavaScript
@@ -36,7 +41,7 @@ Version 1: 2024-11-27
 
      View: <a href=chute.js>chute.js</a>
 
-     Save: <a download href=chute.js>Normal</a> (10KB)
+     Save: <a download href=chute.js>Normal</a> (11KB)
            <a download href=chute.min.js>Minified</a> (3KB)
    
     Links: <a href="https://github.com/gregabbott/chute">GitHub</a>
@@ -61,6 +66,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 <div class="column">
 <p>Chute chains functions and method calls in vanilla JavaScript.</p>
 <pre id="show_example_use"></pre>
+<div id="dom_example"></div>
 </div>
 </main>
 <footer>
@@ -75,7 +81,7 @@ function show_js(){
   .then(s=>{
     document.getElementById('show_example_use').innerHTML=
       hljs.highlight(s,{ language: 'javascript' }).value
-      .replace(/>\/\/ */g,'> ')
+      .replace(/>\/\/ */g,'>')
   })
   .catch(e => console.error('Error fetching the script:', e))
 }
