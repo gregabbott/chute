@@ -50,7 +50,7 @@ const chute_1 = chute(// Call chute to create a new chute.
 // Otherwise it calls the first item found with the same name.
 // Chute searches for matches in this order:
   // A method built in to Chute. (see more below)
-  // A native method of the current data. (e.g. .map .split)
+  // A method of the current data. (e.g. .map .split .custom)
   // A global function.
   // A named non-global function (from some previous call).
 // =============================================================
@@ -68,9 +68,9 @@ const chute_1 = chute(// Call chute to create a new chute.
 // When a call of this kind has arguments but no placeholder,
 // Chute expects the function call to return another function.
 // It sends the data to that returned function.
-// e.g. ".fn(a,b)" == "data = fn(arguments but none data)(data)"
+  // ".fn(a,b)"  ==  "data = fn(arguments no placeholder)(data)"
 
-// SEE: "current value token" for a similar but different idea.
+// SEE ALSO: "Current Value Token" (below)
 // =============================================================
 // LOG 
 // The built in method ".log()" logs the current data.
@@ -89,7 +89,7 @@ const chute_1 = chute(// Call chute to create a new chute.
 // Chute's built in ".tap" method sends data to a function,
 // ignores anything returned, and keeps the existing data.
 .tap(mutate)// A ".tap" function might mutate data directly.
-.log(`Post-tap data`)
+.log(`After tap:`)//It also helps when functions return nothing.
 // =============================================================
 // IF
 // ".if" calls a built in method to act on truthy conditions.
@@ -111,16 +111,16 @@ const chute_1 = chute(// Call chute to create a new chute.
 // ---- (B) if, else if, else (Initial implementation) ---------
 // Shape:
 // The If Else block needs an object with an "if" property.
-// The "if" property must hold a 2 item array.
+// The "if" property must hold a 2 item array (the If the Then).
 // Two other optional properties include "else_if" and "else".
 // Any "else_if" property holds an array of 2 element arrays.
 // Any "else" property holds a value, or a function.
 // The block can have "else" without "else_if" or vice-versa.
 
-// Each 2 element array holds a condition [0] and returnable [1].
+// Each pair array holds a condition [0] and returnable [1].
 // Chute checks each condition until it finds a truthy one.
-// Conditions may reference functions to test the current data,
-// Chute sends the current data value through these functions
+// Conditions may reference functions to test the current data.
+// Chute sends the current data value through these functions,
 // and checks the truthiness of the value they return.
 
 // The If Else block returns a truthy condition's returnable.
@@ -133,13 +133,13 @@ const chute_1 = chute(// Call chute to create a new chute.
 .if({
   if: [is_array, true],
   else_if: [
-    [is_string, 16 ],
+    [is_string, 16],
     [is_number, local_scope_x10],
-    [ true, `yes` ]
+    [true, `yes`]
   ],
   else: 41
 })
-/* Instead of creating a function for a single-use.
+/* The above avoids one-use functions filled with repetition.
 .do(data=>{
   if(is_array(data)){ return 8 }
   else if(is_string(data)){ return 16 }
@@ -149,13 +149,11 @@ const chute_1 = chute(// Call chute to create a new chute.
 .local_scope_x10()// Chute remembers non-globals from .if calls.
 
 // =============================================================
-// Inline functions
-// One alternative to the current value token (detailed below).
-(x=>x*3)// Anything at all
-.log(`Tripled`)
+// INLINE FUNCTIONS (See also: the Current Value Token section.)
+(x=>{log('TRIPLE',x,x*3); return x*3})
 // =============================================================
 .toString()
-[0]// ACCESS INDEX via [\d+] to make it the chute data,
+[0]// ACCESS BY INDEX via [\d+] to make it the chute data,
 .log('Accessed Index Equals: ')
 .replace(/$/,`!`)
 // =============================================================
@@ -188,7 +186,7 @@ log(`chute_2 result:`,chute_2)
 // THE "skip_void" SETTING
 // Chute has a setting called "skip_void" to handle "undefined".
 // When enabled, if a function in a chute returns undefined,
-// Chute ignore it, and continues with the data it already had.
+// Chute ignores it, and continues with the data it already had.
 // I.E. "let x = fn(data); return x === undefined ? data : x"
 // When disabled, the chute makes undefined its new value.
 // "skip_void:true" lets a chute continue in more cases.
@@ -208,7 +206,7 @@ log(`chute_2 result:`,chute_2)
   })
   .classList.add(`round_button`)//This method returns undefined.
   .log('now')//The chute still has the element.
-  ()//End chute. If at the Chute page, find the element below.
+  ()//End chute. (If at the Chute page, see the element below.)
   
   log(`chute_3 result:`,chute_3)//Chute end value.
 

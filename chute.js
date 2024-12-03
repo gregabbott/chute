@@ -330,7 +330,7 @@ function new_chute({seed,fns}){
           set_data(dot_if({args:a,data:get_data()}))
         }
         else if(key=='tap'){
-          if(is_fn(a[0])) a[0](get_data())
+          if(is_fn(a[0])) a[0](get_data())//ignore return
           else error('give .tap a fn to send data to')
         }
         else if(key==='do'){
