@@ -84,19 +84,20 @@ const chain_stopping_methods=new Set([
 function is_condition_block(o){
   //Has {if:[q,a]} and any else_ifs have valid [q,a] pairs
   if(!is_object(o))return false
-  const keys = Object.keys(o),
-  valid_q_a=x=>0 in x && 1 in x,//2 values. Not `[,,]`
-  has_valid_if = 'if' in o&&is_array(o.if)&&valid_q_a(o.if)
-  if(!has_valid_if)return false
-  const optional_keys_count = ('else' in o) + ('else_if' in o)
-  if('else_if' in o){
-    if(!is_array(o.else_if))return false
-    if(o.else_if.length>0){
-      if(!o.else_if.every(x=>is_array(x)&&valid_q_a(x)))return false
+  if(!'if' in o)return false
+  const is_q_a=x=>is_array(x)&&x.length===2&&0 in x && 1 in x
+  let results = Object.entries(o).reduce((a,[k,v])=>{
+    if(k=='if'&&is_array(v)&&is_q_a(v)){ a.valid[k]=v }
+    else if(k=='else_if'){
+      let Y=is_array(v)&&v.map(is_q_a).filter(x=>!x).length<1
+      a[Y?'valid':'invalid'][k]=v
     }
-  }
-  const other_keys_count = keys.length - 1 - optional_keys_count
-  return other_keys_count === 0 && optional_keys_count <= 2
+    else if(k=='else'){ a.valid[k]=v }
+    else { a.invalid[k]=v }
+    return a
+  },{valid:{},invalid:{}})
+  //console.log(results)
+  return Object.keys(results.invalid).length===0
 }
 function process_condition_block(c,data,a_chute) {
   //Code below allows a user to provide `undefined` as a 'Then'
