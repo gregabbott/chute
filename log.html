@@ -3,57 +3,6 @@
 <head>
 <meta charset=utf-8>
 <meta name=color-scheme content="dark light">
-<style>
-:root{
-	color-scheme: light dark;
-  --light: hsl(60, 25%, 95%);
-  --dark: hsl(15, 5%, 10%);
-	--base_size:13px;
-	--bg:light-dark(var(--light),var(--dark));
-	--fg:light-dark(var(--dark),var(--light));
-}
-a {
-  color: var(--fg);
-}
-* {
-  background: var(--bg);
-  color: var(--fg);
-  font-family: monospace;
-  box-sizing: border-box;
-}
-body {
-  width: 100vw;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  height: 100dvh;
-  font-size: 15px;
-  line-height: 150%;
-}
-header,
-footer {
-  width: 100vw;
-  padding: 1ch;
-  text-align: center;
-}
-header {
-  border-bottom: 1px solid var(--fg);
-}
-footer{
-  border-top:  1px solid var(--fg);
-}
-footer, footer *{
-  font-size: 9px;
-}
-main {
-  flex:1;
-  overflow-y:auto;
-  display: flex;
-}
-pre {
-  margin: 0 auto;
-}
-</style>
 <title>Chute Changelog</title>
 </head>
 <body>
@@ -62,25 +11,27 @@ pre {
   </header>
 <main><!-- New dates at top. per date first change at top-->
 <pre>
-# 2024_12_06
-Updates most documentation
-SCRIPT
-  Refactors and slims script
-SITE
-  Adds header levels to dynamic sections.
+# 2024_12_07.1
+Adds and documents option to end chute via "._end()" or "._$()".
+Docs: Documents option to give Chute a custom name e.g. "$()".
+Docs: Orders and nests documentation. 
+Docs: Adds summaries to some section headers.
+
+# 2024_12_06 (10KB)
+DOCS: Updates most documentation.
+SCRIPT: Cleans and slims script.
+SITE: Adds header levels to dynamic sections.
 
 # 2024_12_05
-SCRIPT
-  Adds LIFT to call ".library_name().f_name()" via ".f_name()".
-  Updates documentation.
-  Adds methods that affect all chutes to the chute function:
-    Feed & Lift
-SITE
-  Creates TOC dynamically with jump links.
++js Adds LIFT.
++js Lift makes function libraries available across all chutes.
++js Lift allows calling library functions by name: lib.f()->.f()
++docs Updates documentation.
++site Creates a TOC dynamically, with jump links.
 
 # 2024_12_04
 Memoizes non-global Fns seen for dot-style use in same chute.
-Adds FEED to load function libraries for use in all chutes.
+Adds FEED, to load function libraries for use across all chutes.
 Documents and demonstrates feed option.
 Allows calling unary functions & data methods without '()'.
 If given index e.g. [4], will look for method at that index.
@@ -152,5 +103,56 @@ V1
 <footer>
 Chute By + &copy; 2024 <a href=https://gregabbott.pages.dev>Greg Abbott</a>
 </footer>
+<style>
+:root{
+	color-scheme: light dark;
+  --light: hsl(60, 25%, 95%);
+  --dark: hsl(15, 5%, 10%);
+	--base_size:13px;
+	--bg:light-dark(var(--light),var(--dark));
+	--fg:light-dark(var(--dark),var(--light));
+}
+a {
+  color: var(--fg);
+}
+* {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: monospace;
+  box-sizing: border-box;
+}
+body {
+  width: 100vw;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  font-size: 15px;
+  line-height: 150%;
+}
+header,
+footer {
+  width: 100vw;
+  padding: 1ch;
+  text-align: center;
+}
+header {
+  border-bottom: 1px solid var(--fg);
+}
+footer{
+  border-top:  1px solid var(--fg);
+}
+footer, footer *{
+  font-size: 9px;
+}
+main {
+  flex:1;
+  overflow-y:auto;
+  display: flex;
+}
+pre {
+  margin: 0 auto;
+}
+</style>
 </body>
 </html>

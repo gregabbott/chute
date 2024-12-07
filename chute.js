@@ -1,8 +1,7 @@
 const chute = (()=>{
 /* https://gregabbott.github.io/chute By + Copyright Greg Abbott
-[V1=2024-11-27][V=2024-12-06]*/
-const keys=[],
-stringy=x=>JSON.stringify(x),
+[V1=2024-11-27][V=2024-12-07.1]*/
+const stringy=x=>JSON.stringify(x),
 error=(...x)=>{throw new Error(x)},
 is_fn=x=>x instanceof Function,
 is_number=v=>typeof v ==='number'&&!isNaN(v),
@@ -280,26 +279,33 @@ function new_chute({seed,args}){
     a_chute.set_data(chute_lib.do({args,data:seed,a_chute}))
   }
   const target=()=>{}
+  const keys=[]//i.e call_list
+      //^current keys (named calls) in this chute
   function get(target,key){
     keys.push(key)//collect all keys until user calls with '()'
     return proxy
   }
   function apply(target,this_arg, args){
+    let named_end_chute=['_end','_$'].includes(keys.at(-1))
+    if(named_end_chute)keys.pop()
     let nameless_call=keys.length==0
-    var end_chute = nameless_call && args.length===0
-    if(end_chute)return a_chute.get_data()
-    if(nameless_call&&args.length>0){
+      let nameless_do_call=nameless_call&&args.length>0
+      let nameless_end_chute = nameless_call&&args.length===0
+    let named_call=keys.length>0
+    let end_chute = nameless_end_chute || named_end_chute
+    if(nameless_do_call){
       a_chute.set_data(
         chute_lib.do({args, data:a_chute.get_data(), a_chute})
       )
-      return proxy
     }
-    a_chute.set_data(handle_nested_access({
-      keys, a_chute, args, chute_lib
-    }))
+    if(named_call){// .x(anything) x==anything except end
+      a_chute.set_data(handle_nested_access({
+        keys, a_chute, args, chute_lib
+      }))
+    }
     //processed all keys
     keys.length=0
-    return proxy
+    return end_chute?a_chute.get_data():proxy
   }
   let proxy = new Proxy(target, {get,apply})
   return proxy
