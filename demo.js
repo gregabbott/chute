@@ -16,7 +16,7 @@ const chute_1a_result = chute(// Call Chute to make a new chute.
 .map(double)// Call any methods native to the current data.
 .filter(greater_than(4))
 .reverse// Calls needing no arguments need no parentheses.
-// A future setting will make parentheses optional or mandatory.
+// ^ See Chute's "path" setting to allow explicit calls only.
 .push(6)// In Chute, ".push" returns the array to the chute.
 .forEach(x=>log(`SideFx: ${x}`))// ".forEach" returns its input.
 // =============================================================
@@ -99,8 +99,9 @@ const chute_1a_result = chute(// Call Chute to make a new chute.
 .JSON.parse()
 .log(`Parsed back`)
 .custom.global.method// Nested calls can omit parentheses.
-.log// Chute works out where paths end and begin in dot chains.
-//".reverse.JSON.stringify" == "JSON.stringify(data.reverse())"
+.log
+// In the lines above, Chute figures out when to call functions.
+// See the CALL section for Chute's dot-chain handling options.
 // =============================================================
 // # ENDING A CHUTE
 () // An empty nameless call ends a chute and returns its data.
@@ -307,6 +308,58 @@ log({current_value_token_chute})
   
   log({chute_3_result})
 
+  // ===========================================================
+  // ## PATH - How to interpret dot sequences
+  // Chute has a "path" option that takes a boolean value.
+  // The option controls how Chute handles dot sequences.
+    
+  // ### ON - Treat a dot sequence as a path
+  // With "path" enabled, Chute treats dot sequences as paths.
+  // To use the example dot-style sequence ".A.B.C()",
+  // Chute seeks an A to contain a B holding a function named C.
+  // If all goes well, Chute calls C with any arguments given,
+  // and moves onto any next step in the chute.
+  // In any other event, Chute produces an error message.
+
+  // In this mode, Chute relies on parentheses to delimit calls,
+  // so parentheses appear even for call that take no arguments.
+
+  // ### OFF - Treat a dot sequences as a set of instructions
+  // With "path" disabled, Chute examines each dot sequence,
+  // and makes function calls at logical points along the way,
+  // (instead of expecting a single long path to one function).
+  
+  // For example, in ".reverse.JSON.stringify.log.JSON.parse()",
+  // Chute deduces the paths and call-points in the sequence.
+  // It arrives at: reverse > JSON.stringify > log  > JSON.parse
+  //                call    > path call      > call > path call
+
+  // HOW:
+  // If a key in a sequence holds the next key, Chute moves on.
+  // Otherwise, Chute expect the current key to hold a function.
+  // If it does, Chute sends the data through this function.
+  // If not, Chute throws an error having found a bad path.
+  // Chute repeats this process for each key in a dot sequence.
+  
+  // SUMMARY
+  // In dot sequences, parentheses always trigger a call.
+  // The "path" setting relates to the sequence before the call,
+  // and whether Chute should use it to locate one function,
+  // or treat it as a set of instructions to work through.
+
+  // The example below shows how to enable the "path" setting.
+  let treat_dots_as_path = chute(["a","b","c"])
+  .with({path:true})
+  // With this setting on, and no parentheses on the next line,
+  // Chute wouldn't call LOG, but would expect LOG to hold MAP.
+  .log()
+  .map((x,i)=>x+i)
+  .log()
+  ._end()
+  log({treat_dots_as_path})
+ 
+  // The "Path" setting defaults to false when not provided.
+  // (All other examples represent the setting disabled.)
   // ===========================================================
   // # SETTING FOR ALL CHUTES
   // ===========================================================

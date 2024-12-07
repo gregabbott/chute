@@ -1,6 +1,6 @@
 const chute = (()=>{
 /* https://gregabbott.github.io/chute By + Copyright Greg Abbott
-[V1=2024-11-27][V=2024-12-07.1]*/
+[V1=2024-11-27][V=2024-12-07.2]*/
 const stringy=x=>JSON.stringify(x),
 error=(...x)=>{throw new Error(x)},
 is_fn=x=>x instanceof Function,
@@ -168,6 +168,7 @@ chute_lib.with=({args,data,a_chute})=>{//configure a chute
   if(config.skip_void)a_chute.skip_void=!!config.skip_void
   if(config.feed)load_feed(config.feed)
   if(config.lift)load_lift(config.lift)
+  if(config.path)a_chute.treat_dots_as_paths=!!config.path
   return data//Leaves data unchanged
 }
 function load_sync_fn(o,a_chute){
@@ -175,7 +176,7 @@ function load_sync_fn(o,a_chute){
   a_chute.sync_data=o
   a_chute.sync_data(a_chute.get_data())//Define external_variable
 }
-function handle_nested_access({keys,args,a_chute,chute_lib}){
+function handle_nested_access({keys,args,a_chute}){
   let data = a_chute.get_data()
   let skip_void = a_chute.skip_void
   // This finds break points in a dot sequence.
@@ -203,16 +204,17 @@ function handle_nested_access({keys,args,a_chute,chute_lib}){
       if(global_el)return ['global_this',globalThis]
     error(`"${key}" is not: ${desc}`)
   }
+  /*  globalThis.JSON.stringify(Args)
+          \________/ \__/ \_______/
+              |       |      |
+            root   context  Fn     */
+  let path_mode=a_chute.treat_dots_as_paths
+  //^ if keys==[a.b.c] path_mode expects a[b][c] vs a|>b|>c
   return keys.reduce((a,key,i,l)=>{
     if(!a.path){
       ([a.root_string,a.root]=setup_root(key,a))
       a.path = a.root//a new path starts with the root
       a.context=a.root//context means the item that holds the FN
-      /*  globalThis.JSON.stringify(Args)
-          \________/ \__/ \_______/
-              |       |      |
-            root   context  Fn
-      */
       //console.log(`root of ${key} is ${a.root_string}`)
     }
     a.path=a.path[key]//e.g. GlobalThis['JSON']
@@ -221,6 +223,8 @@ function handle_nested_access({keys,args,a_chute,chute_lib}){
     let next_key=keys[i+1]
     let found_last_in_current_path=a.path[next_key]===undefined
     if(found_last_in_current_path){
+      if(path_mode)error(`"${key}" lacks "${next_key}"`)
+      //^ E.G. ".reverse.log()". path_mode?FAIL:reverse().log()
       //console.log(`run "${key}"`)
       a.data = try_do({fn:a.path,key,a})//not last key so 0 args
       //^ Data forms input for next FN && not saved to chute yet
@@ -261,6 +265,7 @@ const blank_chute=()=>({
   data:null,
   fns_seen: {},//non-global named fns encountered memoized
   with_received:false,
+  treat_dots_as_paths:false,//.log.reverse vs .log().reverse()
   sync_data:null,//Receives `x=>user_variable=x` to send data
   skip_void:true,//Default
 })
@@ -298,10 +303,10 @@ function new_chute({seed,args}){
         chute_lib.do({args, data:a_chute.get_data(), a_chute})
       )
     }
-    if(named_call){// .x(anything) x==anything except end
-      a_chute.set_data(handle_nested_access({
-        keys, a_chute, args, chute_lib
-      }))
+    if(named_call){// .x(anything) x==anything except "_end"
+      a_chute.set_data(
+        handle_nested_access({keys, a_chute, args})
+      )
     }
     //processed all keys
     keys.length=0
