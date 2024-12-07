@@ -161,7 +161,6 @@ a, a *{
   margin: 0 auto;
   display: block;
 }
-
 main {
   flex:1;
   overflow-y:auto;
@@ -180,7 +179,6 @@ body{
   display: flex;
   flex-direction: column;
 }
-
 a,a:visited{
 color: var(--fg);
 }
@@ -224,7 +222,6 @@ code.hljs {
   padding: 2ch;
 }
 .round_button{
-  
   border: 2px solid var(--fg);
   cursor: pointer;
   border-radius: 20px;
@@ -237,7 +234,6 @@ code.hljs {
   flex-direction: column;
   padding-bottom: 50%;
   a{
-    line-height: 150%;
     text-decoration: none;
     border: 1px dashed var(--fg);
     border-color: transparent;
@@ -249,7 +245,7 @@ code.hljs {
   .depth_1{
     border-top: 1px solid var(--fg);
     margin-top: 1ch;
-    padding-top: 2px;
+    xpadding-top: 2px;
     border-radius: 0;
   }
   .depth_1:first-of-type{
