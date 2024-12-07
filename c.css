@@ -235,11 +235,25 @@ code.hljs {
 #toc_links{
   display: flex;
   flex-direction: column;
+  padding-bottom: 50%;
   a{
-    line-height: 128%;
+    line-height: 150%;
+    text-decoration: none;
+    border: 1px dashed var(--fg);
+    border-color: transparent;
+    border-radius: var(--rad);
+  }
+  a:hover{
+    border-color: var(--fg);
   }
   .depth_1{
+    border-top: 1px solid var(--fg);
     margin-top: 1ch;
+    padding-top: 2px;
+    border-radius: 0;
+  }
+  .depth_1:first-of-type{
+    border-top: none;
   }
   .depth_2{
     padding-left: 2ch;
