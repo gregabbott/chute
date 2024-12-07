@@ -46,7 +46,7 @@ Version 1: 2024-11-27
      View: <a href=chute.js>chute.js</a>
 
      Save: <a download href=chute.js>Normal</a> (11KB)
-           <a download href=chute.min.js>Minified</a> (4KB)
+           <a download href=chute.min.js>Minified</a> (5KB)
    
     Links: <a href="https://github.com/gregabbott/chute">GitHub</a>
 
@@ -79,60 +79,68 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     <button popovertarget="popover_license">By and &copy;</button> 2024 <a href="https://gregabbott.pages.dev/">Greg Abbott</a></span> | <a href="https://ko-fi.com/gregabbott">KoFi</a> | <a href="https://buymeacoffee.com/gregabbott">Buy Me A Cofee</a>
 </footer>
 <script>
-window.addEventListener('load', show_js)
-function show_js(){
+window.addEventListener('load', onload)
+function onload(){
   fetch('demo.js')
   .then(response => response.text())
-  .then(s=>{
-    let sections=[]
-    let with_comments = s
-    document.getElementById('show_example_use').innerHTML=
-      hljs.highlight(with_comments,{ language: 'javascript' })
-      .value
-      //.replace(/>\/\/ */g,'>')
-      .replace(/\/\/ ===+/g,'')
-      .replace(
-        /(<span class="hljs-comment">)\/\/ (#+) (.*?)(<\/span>)/g,
-        (all,open,level,txt,shut)=>{
-          let id= txt.toLowerCase().trim().replaceAll(' ','_')
-          let depth=level.length
-          sections.push([id,txt,depth])
-          return( 
-          //`</details>`+`<details open>`+`<summary>`+
-              open+
-              `// <a href="#${id}" class="depth_${depth}">${level}</a> `+
-              `<span id="${id}">${txt}</span>`+
-              shut
-          //`</summary>`
-          )
-        }
-      )
-    let sans_comments= s
-    .replace(/([^\:])\/\/ *.*/g,'$1')
-    .replace(/\n\s*\n+/g,'\n')  
-    document
-      .getElementById('show_example_use_sans_comments')
-      .innerHTML=
-      hljs.highlight(sans_comments,{ language: 'javascript' })
-      .value
-      
-    let toc=document.getElementById('toc_links')
-    let hide_popover=()=>{
-      document.getElementById('popover_toc').hidePopover()
-    }
-    toc.onclick = hide_popover
-    sections.forEach(([id,txt,depth])=>{
-      let el = toc.appendChild(document.createElement('a'))
-        el.innerText=txt
-        el.href='#'+id
-        el.classList=`depth_${depth}`
-        
-    })
-    document.getElementById('toc_button').hidden=false
-  })
+  .then(show_js)
   .catch(e => console.error('Error fetching the script:', e))
+}
+function scroll_to_hash() {  
+  const hash = window.location.hash
+  if (!hash)return
+  const target = document.getElementById(hash.replace('#',''))
+  if (!target) return
+  target.scrollIntoView({ behavior: 'auto' });
+}
+function show_js(s){
+  let sections=[]
+  let with_comments = s
+  document.getElementById('show_example_use').innerHTML=
+    hljs.highlight(with_comments,{ language: 'javascript' })
+    .value
+    //.replace(/>\/\/ */g,'>')
+    .replace(/\/\/ ===+/g,'')
+    .replace(
+      /(<span class="hljs-comment">)\/\/ (#+) (.*?)(<\/span>)/g,
+      (all,open,level,txt,shut)=>{
+        let id= txt.toLowerCase().trim().replaceAll(' ','_')
+        let depth=level.length
+        sections.push([id,txt,depth])
+        return( 
+        //`</details>`+`<details open>`+`<summary>`+
+            open+
+            `// <a href="#${id}" class="depth_${depth}">${level}</a> `+
+            `<span id="${id}">${txt}</span>`+
+            shut
+        //`</summary>`
+        )
+      }
+    )
+  let sans_comments= s
+  .replace(/([^\:])\/\/ *.*/g,'$1')
+  .replace(/\n\s*\n+/g,'\n')  
+  document
+    .getElementById('show_example_use_sans_comments')
+    .innerHTML=
+    hljs.highlight(sans_comments,{ language: 'javascript' })
+    .value
+    
+  let toc=document.getElementById('toc_links')
+  let hide_popover=()=>{
+    document.getElementById('popover_toc').hidePopover()
+  }
+  toc.onclick = hide_popover
+  sections.forEach(([id,txt,depth])=>{
+    let el = toc.appendChild(document.createElement('a'))
+      el.innerText=txt
+      el.href='#'+id
+      el.classList=`depth_${depth}`
+      
+  })
+  document.getElementById('toc_button').hidden=false
+  scroll_to_hash()
 }
 </script>
 </body>
 </html>
-
