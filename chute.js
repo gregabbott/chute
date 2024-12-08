@@ -23,7 +23,7 @@ load_feed_items=o=>{
   loop_o((k,v)=>{if(is_fn(v)||is_object(v))CHUTE.library[k]=v})
   (o)
 },
-chute_lib={},//Holds chute's own functions: log, tap, do, if
+chute_lib={},//Holds a chute's methods: log, tap, do, if
 PLACEHOLDER = {},//Sets data argument position in .fn calls.
 CHUTE=(seed,...args)=>new_chute({seed,args})//Becomes chute FN
 //`chute(seed)` calls CHUTE, returns new chute setup with seed
@@ -89,24 +89,16 @@ const is_condition_block=o=>{
   return Object.keys(results.invalid).length===0
 }
 const process_condition_block=(c,data,a_chute)=>{
-  //Code below allows a user to provide `undefined` as a 'Then'
-  //User may pass in non-global functions, in Ifs and or Thens:
-  //Memoize these for dot-style calling in the same chute.
-  let to_remember = c.else_if
-    ?[c.if, ...c.else_if]
-    :[c.if]
-  to_remember.forEach(([q,a])=>{
+  //Memoize non-global Q/A Fns to dot-style call in same Chute
+  (c.else_if?[c.if, ...c.else_if]:[c.if]).forEach(([q,a])=>{
     if(is_fn(q))a_chute.keep(q)
     if(is_fn(a))a_chute.keep(a)
   })
-  function evaluate({q,data}){ 
-    if(is_fn(q))return q(data)
-    return q
-  }
-  //Return returnable of first truthy match
-  if(evaluate({q:c.if[0],data}))return c.if[1]//answer
+  // Get first truthy's returnable (which may === undefined)
+  function Q({q,data}){ if(is_fn(q)){return q(data)}return q }
+  if(Q({q:c.if[0],data}))return c.if[1]//answer
   if('else_if' in c){
-    for(let[q,a] of c.else_if)if(evaluate({q,data}))return a
+    for(let[q,a] of c.else_if)if(Q({q,data}))return a
   }
   if('else' in c){
     if(is_fn(c.else))a_chute.keep(c.else)
@@ -143,17 +135,15 @@ chute_lib.tap=({args,data})=>{
   return data
 }
 chute_lib.with=({args,data,a_chute})=>{//configure a chute
-  let config = args
-  if(a_chute.with_received)error(`1 with per chute`)
-    a_chute.with_received=true
-  let valid_config=config.length===1&&is_object(config[0])
-  if(!valid_config)error('.with accepts 1 object for settings')
-  config=config[0]//settings object
-  if(config.sync)load_sync_fn(config.sync,a_chute)
-  if('skip' in config)a_chute.skip_void=!!config.skip
-  if(config.feed)load_feed_items(config.feed)
-  if(config.lift)lift_libraries(config.lift)
-  if(config.path)a_chute.treat_dots_as_paths=!!config.path
+  if(a_chute.with_received)error(`1 "with" per chute`)
+  a_chute.with_received=true
+  let o=args.length===1&&is_object(args[0])?args[0]:0
+  if(!o)error('.with accepts 1 object for settings')
+  if(o.sync)load_sync_fn(o.sync,a_chute)
+  if('skip' in o)a_chute.skip_void=!!o.skip
+  if(o.feed)load_feed_items(o.feed)
+  if(o.lift)lift_libraries(o.lift)
+  if(o.path)a_chute.treat_dots_as_paths=!!o.path
   return data//Leaves data unchanged
 }
 function load_sync_fn(o,a_chute){

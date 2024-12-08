@@ -31,115 +31,37 @@
     </div>
   </noscript>
 <div id="p_o_about" popover>
-  <pre>
- Language: Vanilla JavaScript
-
-Version 1: 2024-11-27
-  Version: 2024-12-08.1
-           <a href=log.html>Log</a>
-
-     View: <a href=chute.js>chute.js</a>
-
-     Save: <a download href=chute.js>Normal</a> (11KB)
-           <a download href=chute.min.js>Minified</a> (4KB)
-   
-    Links: <a href="https://github.com/gregabbott/chute">GitHub</a>
-
-  License: <button popovertarget="popover_license">MIT</button>
+<pre>
+- Project: 
+  - By + &copy;</button> <a href="https://gregabbott.pages.dev/">Greg Abbott</a> 2024
+  - DONATE:
+    - <a href="https://buymeacoffee.com/gregabbott">Buy Me A Cofee</a>
+    - <a href="https://ko-fi.com/gregabbott">KoFi</a>
+  - <a href="https://github.com/gregabbott/chute">GitHub</a>
+  - <a href=log.html>Log</a>
+- chute.js (v 2024-12-08.1)
+  - <a href="LICENSE.txt">MIT license</a>
+  - <a href=chute.js>View</a>
+  - Save: 
+    - <a download href=chute.js>Normal</a> (10KB)
+    - <a download href=chute.min.js>Minified</a> (4KB)
+  - Language: Vanilla JavaScript
 </pre>
-</div><!--end about popover-->
-<div id="popover_toc" popover><div id=toc_links></div></div>
-<div id="popover_license" popover><pre>
-The chute.js script License
-The MIT License
-Copyright (c) 2024, <a href=https://gregabbott.pages.dev>Greg Abbott</a>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-</div>
-</pre>
-</div><!--end about popover-->
+</div><!--$about PO-->
+<div id="popover_toc" popover>
+  <div id=toc_links></div>
+</div><!--$TOC PO-->
 <div class="column">
 <p class="no_select">Chute chains functions and method calls in vanilla JavaScript.</p>
 <pre id="show_example_use" class="hljs_block"></pre>
 <pre id="show_example_use_sans_comments" class="hljs_block"></pre>
 <div id="dom_example"></div>
-</div>
+</div><!--$column-->
 </main>
 <footer>
   <span title='copyright Greg Abbott 2024'>
-    <button popovertarget="popover_license">By and &copy;</button> 2024 <a href="https://gregabbott.pages.dev/">Greg Abbott</a></span> | <a href="https://ko-fi.com/gregabbott">KoFi</a> | <a href="https://buymeacoffee.com/gregabbott">Buy Me A Cofee</a>
+    <button popovertarget="p_o_about">By and &copy;</button> 2024 <a href="https://gregabbott.pages.dev/">Greg Abbott</a></span>
 </footer>
-<script>
-window.addEventListener('load', onload)
-function onload(){
-  fetch('demo.js')
-  .then(response => response.text())
-  .then(show_js)
-  .catch(e => console.error('Error fetching the script:', e))
-}
-function scroll_to_hash() {  
-  const hash = window.location.hash
-  if (!hash)return
-  const target = document.getElementById(hash.replace('#',''))
-  if (!target) return
-  target.scrollIntoView({ behavior: 'auto' });
-}
-function show_js(s){
-  let sections=[]
-  let with_comments = s
-  document.getElementById('show_example_use').innerHTML=
-    hljs.highlight(with_comments,{ language: 'javascript' })
-    .value
-    //.replace(/>\/\/ */g,'>')
-    .replace(/\/\/ ===+/g,'')
-    .replace(
-      /(<span class="hljs-comment">)\/\/ (#+) (.*?)(<\/span>)/g,
-      (all,open,level,txt,shut)=>{
-        let id= txt
-          .toLowerCase()
-          .trim()
-          .replace(/ *[:-] .*/,'')
-          .replaceAll(' ','_')
-        let depth=level.length
-        sections.push([id,txt,depth])
-        return( 
-        //`</details>`+`<details open>`+`<summary>`+
-            open+
-            `// <a href="#${id}" class="depth_${depth}">${level}</a> `+
-            `<span id="${id}">${txt}</span>`+
-            shut
-        //`</summary>`
-        )
-      }
-    )
-  let sans_comments= s
-  .replace(/([^\:])\/\/ *.*/g,'$1')
-  .replace(/\n\s*\n+/g,'\n')  
-  document
-    .getElementById('show_example_use_sans_comments')
-    .innerHTML=
-    hljs.highlight(sans_comments,{ language: 'javascript' })
-    .value
-    
-  let toc=document.getElementById('toc_links')
-  let hide_popover=()=>{
-    document.getElementById('popover_toc').hidePopover()
-  }
-  toc.onclick = hide_popover
-  sections.forEach(([id,txt,depth])=>{
-    let el = toc.appendChild(document.createElement('a'))
-      el.innerText=txt
-      el.href='#'+id
-      el.classList=`depth_${depth}`
-      
-  })
-  document.getElementById('toc_button').hidden=false
-  scroll_to_hash()
-}
-</script>
+<script defer src="index.js"></script>
 </body>
 </html>
