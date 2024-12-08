@@ -1,7 +1,4 @@
-<!DOCTYPE html>
-<html lang=en>
-<head>
-<meta charset=utf-8>
+<!DOCTYPE html><html lang=en><head><meta charset=utf-8>
 <meta name=color-scheme content="dark light">
 <link rel=icon href=data:;base64,iVBORw0KGgo=>
 <link rel="stylesheet" href="c.css">
@@ -18,12 +15,10 @@
   <input id="hide_comments" type="checkbox" hidden>
   <header>
     <div>
-      <button popovertarget="popover_about">Menu</button>
-      <button popovertarget="popover_toc" id="toc_button" hidden>TOC</button>
+      <button popovertarget="p_o_about">Menu</button>
+      <button popovertarget="popover_toc" id="toc_button" hidden>Nav</button>
     </div>
-    <div>
-      <button popovertarget="popover_about">CHUTE</button><br>
-    </div>
+    <div><button popovertarget="p_o_about">CHUTE</button></div>
     <div>
       <label for="hide_comments" id="hide_comments_label">Hide Notes</label>
     </div>
@@ -35,18 +30,18 @@
       It uses JavaScript to present the content of <a href=demo.js>demo.js</a>
     </div>
   </noscript>
-<div id="popover_about" popover>
+<div id="p_o_about" popover>
   <pre>
  Language: Vanilla JavaScript
 
 Version 1: 2024-11-27
-  Version: 2024-12-07.3
+  Version: 2024-12-08.1
            <a href=log.html>Log</a>
 
      View: <a href=chute.js>chute.js</a>
 
      Save: <a download href=chute.js>Normal</a> (11KB)
-           <a download href=chute.min.js>Minified</a> (5KB)
+           <a download href=chute.min.js>Minified</a> (4KB)
    
     Links: <a href="https://github.com/gregabbott/chute">GitHub</a>
 
@@ -104,7 +99,11 @@ function show_js(s){
     .replace(
       /(<span class="hljs-comment">)\/\/ (#+) (.*?)(<\/span>)/g,
       (all,open,level,txt,shut)=>{
-        let id= txt.toLowerCase().trim().replaceAll(' ','_')
+        let id= txt
+          .toLowerCase()
+          .trim()
+          .replace(/ *[:-] .*/,'')
+          .replaceAll(' ','_')
         let depth=level.length
         sections.push([id,txt,depth])
         return( 

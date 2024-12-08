@@ -1,6 +1,6 @@
 const chute = (()=>{
-/* https://gregabbott.github.io/chute By + (C) Greg Abbott
-[V1=2024-11-27][V=2024-12-07.3]*/
+// https://gregabbott.github.io/chute By + Copyright Greg Abbott
+// [V1=2024-11-27][V=2024-12-08.1]
 const stringy=x=>JSON.stringify(x),
 error=(...x)=>{throw new Error(x)},
 is_fn=x=>x instanceof Function,
@@ -10,21 +10,18 @@ is_object=v=>v&& typeof v=='object'&&!Array.isArray(v),
 is_js_method=(o,k)=>is_fn(Object.getPrototypeOf(o)[k]),
 is_global_fn=name=>is_fn(globalThis[name]),
 loop_o=f=>o=>{for(let k in o)if(f(k,o[k],o)===!1)break},
-lift_a_library =(k,v)=>{
-  if(!is_object(v))return
-  CHUTE.library[k]=v
-  CHUTE.lifted_libraries.push(v)
-},
 lift_libraries=o=>{// hoist
   if(!is_object(o))error(`give .lift 1 object`)
-  loop_o(lift_a_library)(o)
-},
-load_a_feed_item=(k,v)=>{
-  if(is_fn(v)||is_object(v))CHUTE.library[k]=v
+  loop_o((k,v)=>{
+    if(!is_object(v))return
+    CHUTE.library[k]=v
+    CHUTE.lifted_libraries.push(v)
+  })(o)
 },
 load_feed_items=o=>{
   if(!is_object(o))error(`give .feed 1 object`)
-  loop_o(load_a_feed_item)(o)
+  loop_o((k,v)=>{if(is_fn(v)||is_object(v))CHUTE.library[k]=v})
+  (o)
 },
 chute_lib={},//Holds chute's own functions: log, tap, do, if
 PLACEHOLDER = {},//Sets data argument position in .fn calls.
@@ -117,7 +114,7 @@ const process_condition_block=(c,data,a_chute)=>{
   }
   return data//No matches
 }
-chute_lib.if=({args,data,a_chute})=>{
+chute_lib.pick=({args,data,a_chute})=>{
   if(args.length==0)error('.if needs 1-2 arguments')
   let conditions_block=
      args.length===2?{if:args}//reshape as if-else object
@@ -129,8 +126,7 @@ chute_lib.if=({args,data,a_chute})=>{
       data,
       a_chute
     )
-    let unchanged=data===rv
-    if(unchanged)return data
+    if(data===rv)return data//unchanged
     if(is_fn(rv))return call_a_function({fn:rv,data,args:[]})
     //^If above true, memoized the FN in process_condition_block
     return rv
@@ -154,7 +150,7 @@ chute_lib.with=({args,data,a_chute})=>{//configure a chute
   if(!valid_config)error('.with accepts 1 object for settings')
   config=config[0]//settings object
   if(config.sync)load_sync_fn(config.sync,a_chute)
-  if(config.skip_void)a_chute.skip_void=!!config.skip_void
+  if('skip' in config)a_chute.skip_void=!!config.skip
   if(config.feed)load_feed_items(config.feed)
   if(config.lift)lift_libraries(config.lift)
   if(config.path)a_chute.treat_dots_as_paths=!!config.path
@@ -221,7 +217,7 @@ function handle_nested_access(a_chute,args){
       // next key starts a new path:
       a.path=null//reset
     }
-    a.context=a.path//the current item holds the next item
+    else a.context=a.path//the current item holds the next item
     return a
   },{path:null,data,context:null,root:null})
   function try_do({fn,key,a,args=[]}){
@@ -244,7 +240,7 @@ function handle_nested_access(a_chute,args){
       rv = fn.call(a.context,...swap_placeholders(args,a.data))
       rv = chain_stopping_methods.has(key)?a.data:rv
     }
-    return skip_void&&rv===undefined?a.data:rv
+    return rv===undefined&&skip_void?/*old*/a.data:/*new*/rv
   }
 }
 const blank_chute=()=>({
@@ -256,44 +252,46 @@ const blank_chute=()=>({
   skip_void:true,//Default
   dot_list:[],//^.a.b.c collected until '()'
 })
+function _get(a_chute,key){
+  a_chute.dot_list.push(key)//store all keys pre '()' apply
+}
+function _apply(a_chute, args){
+  let named_end_chute=['_end','_$']
+    .includes(a_chute.dot_list.at(-1))
+  if(named_end_chute)a_chute.dot_list.pop()
+  let is_nameless_call = a_chute.dot_list.length==0,
+  is_nameless_do_call = is_nameless_call && args.length>0,
+  is_nameless_end_chute = is_nameless_call && args.length===0,
+  is_named_call = !is_nameless_call,
+  should_end_chute = is_nameless_end_chute || named_end_chute
+  let update_value = is_nameless_do_call||is_named_call
+  let rv
+  if(is_nameless_do_call){
+    rv=chute_lib.do({args, data:a_chute.get_data(), a_chute})
+  }
+  else if(is_named_call)rv=handle_nested_access(a_chute, args)
+  if(update_value)a_chute.set_data(rv)
+  a_chute.dot_list.length=0//Reset : processed all call keys
+  return should_end_chute?a_chute.get_data():a_chute.proxy
+}
 function new_chute({seed,args}){
   let a_chute=blank_chute()
       a_chute.keep=make_memoizer(a_chute)
   a_chute.set_data=x=>{
-  //console.log(`result of "${keys[0]||'nameless'}"`,x,typeof x)
-    if(a_chute.skip_void&&x===undefined)return/*move on*/
+    if(x===undefined&&a_chute.skip_void)return/*move on*/
     if(a_chute.sync_data/*provided*/){a_chute.sync_data(x)}
     a_chute.data=x
   }
   a_chute.get_data=()=>a_chute.data
-  a_chute.set_data(seed)//initial chute call may give seed value
+  if(seed)a_chute.set_data(seed)
   if(args.length>0){
     a_chute.set_data(chute_lib.do({args,data:seed,a_chute}))
   }
-  function get(target,key){
-    a_chute.dot_list.push(key)//store all keys pre '()' apply
-    return proxy
-  }
-  function apply(target,this_arg, args){
-    let named_end_chute=['_end','_$']
-      .includes(a_chute.dot_list.at(-1))
-    if(named_end_chute)a_chute.dot_list.pop()
-    let is_nameless_call = a_chute.dot_list.length==0,
-    is_nameless_do_call = is_nameless_call && args.length>0,
-    is_nameless_end_chute = is_nameless_call && args.length===0,
-    is_named_call = a_chute.dot_list.length>0,
-    should_end_chute = is_nameless_end_chute || named_end_chute,
-    rv
-    if(is_nameless_do_call){
-      rv=chute_lib.do({args, data:a_chute.get_data(), a_chute})
-    }
-    else if(is_named_call)rv=handle_nested_access(a_chute, args)
-    if(rv)a_chute.set_data(rv)
-    a_chute.dot_list.length=0//Reset : processed all call keys
-    return should_end_chute?a_chute.get_data():proxy
-  }
-  let proxy = new Proxy(()=>{}/*target*/,{get,apply})
-  return proxy
+  a_chute.proxy = new Proxy(()=>{},{
+    get:(_,k)=>{_get(a_chute,k);return a_chute.proxy},
+    apply:(_,__,args)=>_apply(a_chute,args)
+  })
+  return a_chute.proxy
 }
 return CHUTE
 })()

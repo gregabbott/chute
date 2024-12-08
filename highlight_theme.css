@@ -1,87 +1,90 @@
-/*!
-Theme: GitHub Dark
-Description: Dark theme as seen on github.com
-Author: github.com
-Maintainer: @Hirse
-Updated: 2021-05-15
-Outdated base version: https://github.com/primer/github-syntax-dark
-Current colors taken from GitHub's CSS
+pre code.hljs {
+  display: block;
+  overflow-x: auto;
+  padding: 1em
+}
+code.hljs {
+  padding: 3px 5px
+}
+/*
+
+Atom One Light by Daniel Gamage
+Original One Light Syntax theme from https://github.com/atom/one-light-syntax
+
+base:    #fafafa
+mono-1:  #383a42
+mono-2:  #686b77
+mono-3:  #a0a1a7
+hue-1:   #0184bb
+hue-2:   #4078f2
+hue-3:   #a626a4
+hue-4:   #50a14f
+hue-5:   #e45649
+hue-5-2: #c91243
+hue-6:   #986801
+hue-6-2: #c18401
+
 */
 .hljs {
-color: #c9d1d9;
-background: #000000
+  color: #383a42;
+  background: #fafafa
+}
+.hljs-comment,
+.hljs-quote {
+  color: #a0a1a7;
+  font-style: italic
 }
 .hljs-doctag,
 .hljs-keyword,
-.hljs-meta .hljs-keyword,
-.hljs-template-tag,
-.hljs-template-variable,
-.hljs-type,
-.hljs-variable.language_ {
-color: #ff7b72
+.hljs-formula {
+  color: #a626a4
 }
-.hljs-title,
-.hljs-title.class_,
-.hljs-title.class_.inherited__,
-.hljs-title.function_ {
-color: #d2a8ff
+.hljs-section,
+.hljs-name,
+.hljs-selector-tag,
+.hljs-deletion,
+.hljs-subst {
+  color: #e45649
+}
+.hljs-literal {
+  color: #0184bb
+}
+.hljs-string,
+.hljs-regexp,
+.hljs-addition,
+.hljs-attribute,
+.hljs-meta .hljs-string {
+  color: #50a14f
 }
 .hljs-attr,
-.hljs-attribute,
-.hljs-literal,
-.hljs-meta,
-.hljs-number,
-.hljs-operator,
-.hljs-selector-attr,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-type,
 .hljs-selector-class,
-.hljs-selector-id,
-.hljs-variable {
-color: #79c0ff
+.hljs-selector-attr,
+.hljs-selector-pseudo,
+.hljs-number {
+  color: #986801
 }
-.hljs-meta .hljs-string,
-.hljs-regexp,
-.hljs-string {
-color: #a5d6ff
+.hljs-symbol,
+.hljs-bullet,
+.hljs-link,
+.hljs-meta,
+.hljs-selector-id,
+.hljs-title {
+  color: #4078f2
 }
 .hljs-built_in,
-.hljs-symbol {
-color: #ffa657
-}
-.hljs-code,
-.hljs-comment,
-.hljs-formula {
-color: #8b949e
-}
-.hljs-name,
-.hljs-quote,
-.hljs-selector-pseudo,
-.hljs-selector-tag {
-color: #7ee787
-}
-.hljs-subst {
-color: #c9d1d9
-}
-.hljs-section {
-color: #1f6feb;
-font-weight: 700
-}
-.hljs-bullet {
-color: #f2cc60
+.hljs-title.class_,
+.hljs-class .hljs-title {
+  color: #c18401
 }
 .hljs-emphasis {
-color: #c9d1d9;
-font-style: italic
+  font-style: italic
 }
 .hljs-strong {
-color: #c9d1d9;
-font-weight: 700
+  font-weight: bold
 }
-.hljs-addition {
-color: #aff5b4;
-background-color: #033a16
+.hljs-link {
+  text-decoration: underline
 }
-.hljs-deletion {
-color: #ffdcd7;
-background-color: #67060c
-}
-/* End 

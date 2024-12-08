@@ -12,13 +12,13 @@ const chute_1a_result = chute(// Call Chute to make a new chute.
 // (To see what chute can do when setup, see the Feed section).
 // =============================================================
 // ## CALL METHODS
-// (Note the commands below continue the chute above)
+// (The commands below continue the chute above)
 .map(double)// Call any methods native to the current data.
-.filter(greater_than(4))
-.reverse// Calls needing no arguments need no parentheses.
-// ^ See Chute's "path" setting to allow explicit calls only.
 .push(6)// In Chute, ".push" returns the array to the chute.
 .forEach(x=>log(`SideFx: ${x}`))// ".forEach" returns its input.
+.reverse// Calls needing no arguments need no parentheses.
+// ^ See Chute's "path" setting to allow explicit calls only.
+.filter(greater_than(4))
 // =============================================================
 // ## DOT-STYLE CALL GLOBAL FUNCTIONS
 // Chute can invoke any global functions using dot-style calls.
@@ -62,7 +62,7 @@ const chute_1a_result = chute(// Call Chute to make a new chute.
   local_push(64),
   x=>{x.push('Inline');return x}
 )
-// As a "do" call receives functions as arguments,
+// Because a "do" call receives functions as arguments,
 // the method works with global and non-global functions,
 // as well as single-use inline functions (as shown above).
 // ------------------------------------------------------------
@@ -91,20 +91,21 @@ const chute_1a_result = chute(// Call Chute to make a new chute.
 
 ( x => { log('Inline function received:', x); return x } )
 
-// For inline expressions, see the Current Value Token section.
+// See the "Sync" section for inline expressions in Chute calls.
 // =============================================================
 // ## CALL GLOBAL NESTED METHODS
 .JSON.stringify// a.b.c.method()
 .log(`Stringified!`) // This line calls a built in chute method.
-.JSON.parse()
+.JSON.parse
 .log(`Parsed back`)
 .custom.global.method// Nested calls can omit parentheses.
 .log
 // In the lines above, Chute figures out when to call functions.
-// See the CALL section for Chute's dot-chain handling options.
+// See Chute's "Path" setting to control dot-sequence handling.
 // =============================================================
 // # ENDING A CHUTE
 () // An empty nameless call ends a chute and returns its data.
+// Every step above happens in a single chute.
 log({chute_1a_result})
 // To make a call nameless, a prior item needs end parentheses.
 // (Otherwise the call only explicitly calls the prior item.)
@@ -121,7 +122,7 @@ let alternate_chute_ending = chute([2,3,4])
 .wrap_in_array//global function
 ._end()//chute command
 
-console.log({alternate_chute_ending})
+log({alternate_chute_ending})
 // =============================================================
 // # ARGUMENT PLACEHOLDER - Give the data at a custom position.
 // Chute's property "x" points to a placeholder object.
@@ -142,10 +143,11 @@ const chute_1b_result = chute([1,3,5,7,9])
 .placeholder_test(`See the data in the console ->`,placeholder)
 // The call above equates to: "data = fn(string, current_data)".
 
-// See also the "Current Value Token" section.
+// See also the "Sync" setting for Chute's Current Value Token.
 // =============================================================
-// # BUILT IN METHODS / COMMANDS
-// As well as '.do' every chute has some built in methods
+// # TOOLS - BUILT IN METHODS / COMMANDS
+// The sections below detail a few of Chute's built in methods. 
+// Besides ".do", Chute has "log", "tap", "if" and "with"
 // =============================================================
 // ## LOG 
 // The built in method ".log()" logs the current data.
@@ -161,22 +163,8 @@ const chute_1b_result = chute([1,3,5,7,9])
 // The tap method allows for any needed side effects mid-chute.
 .log(`Post tap:`)
 // =============================================================
-// ## IF
-// ".if" calls a built in method to act on truthy conditions.
-
-// ---- (A) If this, then that ---------------------------------
-// An "If this, then that" ".if" call takes 2 arguments.
-// Argument 1 can hold a function or value, e.g. "is_monday()".
-// Chute sends the current data to any argument 1 function.
-// The function returns a truthy or falsey value.
-
-// A truthy condition lets Chute looks at the second argument.
-// If argument 2 holds a value, it replaces the chute data.
-// If it holds a function, Chute sends it the current data,
-// and the chute resumes with the value the function returns.
-
-.if(is_array,total)
-.log(`Total: `)
+// ## PICK
+// ".pick" calls a built in if-else method.
 
 // ---- (B) if, else if, else (Initial implementation) ---------
 // Shape:
@@ -200,20 +188,18 @@ const chute_1b_result = chute([1,3,5,7,9])
 // and keeps whatever that function returns as the new data.
 
 // With no match and no "else" given, the data stays the same.
-
-// The ".if" method offers a more concise approach to "if-else".
-
-.if({
-  if: [is_array, true],
+.log('Before pick:')
+.pick({
+  if: [is_number, local_x10],
   else_if: [
     [is_string, 16],
-    [is_number, local_x10],
+    [is_array, total],
     [true, `yes`]
   ],
   else: 41
 })
-
-// Some ".if" calls may contain non-global named functions.
+.log('After pick:')
+// Some ".pick" calls might contain non-global named functions.
 // When Chute encounters these functions, it remembers them,
 // and makes them dot-style callable until the chute ends.
 
@@ -222,8 +208,8 @@ const chute_1b_result = chute([1,3,5,7,9])
 .local_x10
 .log('Multiplied by 10:')
 
-/* The code below shows an alternative to the ".if" call above,
-   written to demonstrate the same idea as an inline function:
+/* To demonstrate an alternative to the ".pick" call above,
+   the code below shows the same idea as an inline function:
 
   .do(data=>{
     if(is_array(data)){ return 8 }
@@ -248,20 +234,25 @@ function non_global_unary(f){log(`Local Unary`);return f}
 function local_x10(f){log(`Doing: ${f} * 10`);return f*10}
 
 // =============================================================
-// # CURRENT VALUE TOKEN - Use the current value in expressions
+// ## WITH - SETTINGS PER CHUTE
+// Every chute has a "with" method that takes a settings object.
+// The optional object has optional properties detailed below.
+// =============================================================
+// ### SYNC - Use a current value token for inline expressions
 // A settings object for a chute can include a "sync" property.
 // The "sync" property takes a function that updates a variable.
 // As a chute runs, it sends this function the current data.
 // Calls within the chute can then use the variable as needed.
 
 let x // A variable to hold the current value can have any name.
-const current_value_token_chute = chute()//An initial call to Chute may omit data.
+//The line below shows an empty initial call to Chute.
+const current_value_token_chute = chute()
 .with({//A chute can receive its setting before its seed.
   // This settings object gives the chute a "sync" function.
   sync:v=>x=v//This sync function controls the variable x above.
 })//This configured chute will work as before but can do more.
 ({two:2,four:4,eight:8})// It begins with a seed value as usual.
-// The calls below all make use of the current value token.
+// All of the calls below make use of the current value token.
 // The token allows for:
 (x.eight) // PROPERTY ACCESSS   vs. "(x=>x.eight)"
 (x + 10)// ARITHMETIC           vs. "(x=>x+10)"
@@ -273,23 +264,19 @@ const current_value_token_chute = chute()//An initial call to Chute may omit dat
 
 log({current_value_token_chute})
 // =============================================================
-// # SETTINGS PER CHUTE
-// Every chute has a "with" method that takes a settings object.
-// The optional object has optional properties detailed below.
-// =============================================================
-// ## SKIP - Control how a chute handles undefined returns
-// Chute has a "skip_void" setting to handle "undefined".
+// ### SKIP - Control how a chute handles undefined returns
+// Chute has a "skip" setting to handle "undefined".
 // When enabled, if a function in a chute returns undefined,
 // Chute ignores it, and continues with the data it already had.
 
 // When disabled, the chute makes undefined its new value.
-// "skip_void: true" lets a chute continue in more cases.
+// "skip: true" lets a chute continue in more cases.
 // The setting defaults to true if not explicitly set.
 
 // As steps in the following chute return undefined,
-// having "skip_void" set to true helps preserve wanted data.
-  let chute_3_result = chute()
-  .with({skip_void:true})
+// having "skip" set to true helps preserve wanted data.
+  let skip_void_chute_result = chute()
+  .with({skip:true})
   ({
     tag:`div`,
     parent:`dom_example`
@@ -301,30 +288,30 @@ log({current_value_token_chute})
     innerText:`Chute #3 made this element`,
     onclick:()=>alert(`Chute!`),
   })//The next call in this chute returns undefined.
-  .classList.add(`round_button`)//Undefined triggers skip_void.
-  .log('Data now:')//skip_void prevents losing the chute item.
+  .classList.add(`round_button`)//Undefined triggers 'skip'.
+  .log('Data now:')//'skip' prevents losing the chute item.
   ()// The chute ends and returns the preserved item.
   // (If viewing the Chute site, see the created element below.)
   
-  log({chute_3_result})
+  log({skip_void_chute_result})
 
   // ===========================================================
-  // ## PATH - How to interpret dot sequences
+  // ### PATH - How to interpret dot sequences
   // Chute has a "path" option that takes a boolean value.
   // The option controls how Chute handles dot sequences.
     
-  // ### ON - Treat a dot sequence as a path
+  // #### ON - Treat a dot sequence as a path
   // With "path" enabled, Chute treats dot sequences as paths.
   // To use the example dot-style sequence ".A.B.C()",
   // Chute seeks an A to contain a B holding a function named C.
   // If all goes well, Chute calls C with any arguments given,
-  // and moves onto any next step in the chute.
+  // and moves on to any next step in the chute.
   // In any other event, Chute produces an error message.
 
   // In this mode, Chute relies on parentheses to delimit calls,
   // so parentheses appear even for call that take no arguments.
 
-  // ### OFF - Treat a dot sequences as a set of instructions
+  // #### OFF - Treat a dot sequences as a set of instructions
   // With "path" disabled, Chute examines each dot sequence,
   // and makes function calls at logical points along the way,
   // (instead of expecting a single long path to one function).
@@ -361,7 +348,7 @@ log({current_value_token_chute})
   // The "Path" setting defaults to false when not provided.
   // (All other examples represent the setting disabled.)
   // ===========================================================
-  // # SETTING FOR ALL CHUTES
+  // # ALL - SETTING FOR ALL CHUTES
   // ===========================================================
   // ## FEED - Make functions available to all chutes.
 
@@ -424,18 +411,20 @@ demonstrate_scope()
 //--------------------------------------------------------------
 
 // The chute below calls functions from a non-global library
-// which an earlier step supplied to Chute.
+// which an earlier call to "chute.feed" made possible.
 // The object that provided the library gave it a shorter name,
 // so the chute below can call these functions more easily.
 
-let chute_5_result = chute(100)
+const use_fed = chute(100)
   .sum.add(64)
   .sum.divide_by(25)
   .sum.times_by(3.14)
   .Math.floor()//This penultimate chute call needs parentheses.
   ()//The chute ends with a single nameless call.
-log({chute_5_result})
-
+log(
+  'Result of chute using functions provided via feed',
+  use_fed
+)
 // An object above named "example_main_library" holds functions.
 // Chute received this library through its "lift" method.
 // This made the functions inside the library callable by name.
@@ -443,23 +432,29 @@ log({chute_5_result})
 // It calls a function named "sentence" by its name, 
 // instead of having to call "example_main_library.sentence."
 
-let chute_6_result = chute().name_of_today.sentence()()
-log({chute_6_result})
+const use_lifted = chute()
+  .name_of_today
+  .sentence()
+  ()
+log(
+  'Result of chute using functions provided via lift',
+  use_lifted
+)
 // =============================================================
-// # OTHER
+// # MORE
 // =============================================================
-// ## ORDER - How chute chooses what to do per dot-style call
+// ## RANK - How chute chooses what to do per dot-style call
 // Chute evaluates what to do per dot-style call it receives.
 // It either finds an action to take, or returns an error.
 // Chute searches for matching actions in the following order:
-  // A method built in to Chute. (.do, .if, .tap, etc.)
+  // A method built in to Chute. (.do, .pick, .tap, etc.)
   // A method of the current data. (.map, .split, .custom.)
   // A named non-global function (given earlier in the chute).
   // A function given to Chute's .feed or .lift methods.
   // A global function.
 // The script logic accounts for nested calls.
 // =============================================================
-// ## NAME - Give chute a custom name as and when needed.
+// ## NAME - Give the chute function a custom name when needed.
 
 const $ = chute // This line lets a dollar sign call chute.
 
@@ -470,9 +465,9 @@ let custom_named_chute = $([2,3,4])
 .double
 ._end()
 
-console.log({custom_named_chute})
+log({custom_named_chute})
 
-// ## Helper function used for the demo
+// # Helper function used for the demo
 function return_falsey(){return 0}
 function placeholder_test(a,x){log(a,x);return x}
 function extract_quoted(x){return x.replace(/.*?"(.*?)"/,`$1`)}

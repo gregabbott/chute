@@ -4,7 +4,7 @@ textarea{
 }
 :root{
 	color-scheme: light dark;
-  --light:hsl(60, 25%, 95%);
+  --light: hsl(60, 25%, 95%);
   --dark:hsl(15, 5%, 10%);
 	--base_x1:1ch;
   --half_base_x1:.5ch;
@@ -14,6 +14,10 @@ textarea{
   --line_height:120%;
   --sans: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --rad:3px;
+}
+::selection{
+  background-color: var(--fg);
+  color: var(--bg);
 }
 *{
 	outline:none;
@@ -242,10 +246,12 @@ code.hljs {
   a:hover{
     border-color: var(--fg);
   }
+  a:active{
+    border-style: solid;
+  }
   .depth_1{
     border-top: 1px solid var(--fg);
     margin-top: 1ch;
-    xpadding-top: 2px;
     border-radius: 0;
   }
   .depth_1:first-of-type{
@@ -256,5 +262,8 @@ code.hljs {
   }
   .depth_3{
     padding-left: 4ch;
+  }
+  .depth_4{
+    padding-left: 6ch;
   }
 }
