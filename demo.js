@@ -147,7 +147,7 @@ const chute_1b_result = chute([1,3,5,7,9])
 // =============================================================
 // # TOOLS - BUILT IN METHODS / COMMANDS
 // The sections below detail a few of Chute's built in methods. 
-// Besides ".do", Chute has "log", "tap", "if" and "with"
+// Besides ".do", Chute has "log", "tap", and "pick"
 // =============================================================
 // ## LOG 
 // The built in method ".log()" logs the current data.
@@ -203,7 +203,7 @@ const chute_1b_result = chute([1,3,5,7,9])
 // When Chute encounters these functions, it remembers them,
 // and makes them dot-style callable until the chute ends.
 
-// As the "if" block above provided such a function,
+// As the "pick" block above provided such a function,
 // the next dot-style call can make use of it.
 .local_x10
 .log('Multiplied by 10:')
@@ -234,20 +234,20 @@ function non_global_unary(f){log(`Local Unary`);return f}
 function local_x10(f){log(`Doing: ${f} * 10`);return f*10}
 
 // =============================================================
-// ## WITH - SETTINGS PER CHUTE
-// Every chute has a "with" method that takes a settings object.
-// The optional object has optional properties detailed below.
+// # MAKE - Make Chute with custom settings
+// To configure a custom chute call chute.make()
+// It takes an object for optional settings detailed below.
+// Make returns a configured chute ready for use.
 // =============================================================
-// ### SYNC - Use a current value token for inline expressions
+// ## SYNC - Set up a current value token for inline expressions
 // A settings object for a chute can include a "sync" property.
 // The "sync" property takes a function that updates a variable.
 // As a chute runs, it sends this function the current data.
 // Calls within the chute can then use the variable as needed.
 
 let x // A variable to hold the current value can have any name.
-//The line below shows an empty initial call to Chute.
-const current_value_token_chute = chute()
-.with({//A chute can receive its setting before its seed.
+//The line below calls "chute.make" for a custom chute.
+const current_value_token_chute = chute.make({
   // This settings object gives the chute a "sync" function.
   sync:v=>x=v//This sync function controls the variable x above.
 })//This configured chute will work as before but can do more.
@@ -264,7 +264,7 @@ const current_value_token_chute = chute()
 
 log({current_value_token_chute})
 // =============================================================
-// ### SKIP - Control how a chute handles undefined returns
+// ## SKIP - Ignore or keep undefined returned from functions
 // Chute has a "skip" setting to handle "undefined".
 // When enabled, if a function in a chute returns undefined,
 // Chute ignores it, and continues with the data it already had.
@@ -275,8 +275,7 @@ log({current_value_token_chute})
 
 // As steps in the following chute return undefined,
 // having "skip" set to true helps preserve wanted data.
-  let skip_void_chute_result = chute()
-  .with({skip:true})
+  let skip_void_chute_result = chute.make({skip:true})
   ({
     tag:`div`,
     parent:`dom_example`
@@ -296,11 +295,11 @@ log({current_value_token_chute})
   log({skip_void_chute_result})
 
   // ===========================================================
-  // ### PATH - How to interpret dot sequences
-  // Chute has a "path" option that takes a boolean value.
+  // ## PATH - Treat a dot sequence as a path or instruction set
+  // Chute has a "path" setting that takes a boolean value.
   // The option controls how Chute handles dot sequences.
     
-  // #### ON - Treat a dot sequence as a path
+  // ### ON - Treat a dot sequence as a path
   // With "path" enabled, Chute treats dot sequences as paths.
   // To use the example dot-style sequence ".A.B.C()",
   // Chute seeks an A to contain a B holding a function named C.
@@ -311,7 +310,7 @@ log({current_value_token_chute})
   // In this mode, Chute relies on parentheses to delimit calls,
   // so parentheses appear even for call that take no arguments.
 
-  // #### OFF - Treat a dot sequences as a set of instructions
+  // ### OFF - Treat a dot sequence as a set of instructions
   // With "path" disabled, Chute examines each dot sequence,
   // and makes function calls at logical points along the way,
   // (instead of expecting a single long path to one function).
@@ -335,8 +334,8 @@ log({current_value_token_chute})
   // or treat it as a set of instructions to work through.
 
   // The example below shows how to enable the "path" setting.
-  let treat_dots_as_path = chute(["a","b","c"])
-  .with({path:true})
+  let treat_dots_as_path = chute.make({path:true})
+  (["a","b","c"])
   // With this setting on, and no parentheses on the next line,
   // Chute wouldn't call LOG, but would expect LOG to hold MAP.
   .log()
@@ -373,6 +372,10 @@ log({current_value_token_chute})
     really_long_name_library,//Add a library.
     sum:really_long_name_library,//Optionally rename items.
   })
+  // ".feed" returns the Chute function so allows chaining.
+  // The line below continues the above call into a new chute.
+  // It also uses a function just fed in to the "feed" object.
+  (10).sum.subtract(2).log('Chained ".feed"')
   
   // ===========================================================
   // ## LIFT - Make functions in libraries directly callable
@@ -387,13 +390,20 @@ log({current_value_token_chute})
   // as well as ".library_name.function_name()" for context.
 
   const example_main_library={
-    frequently_used_action_a:x=>{console.log('AA');return x},
+    frequently_used_action:x=>x+' time',
+    //f2,f3,f4…
     sentence:x=>{console.log(`Today is ${x}!`);return x},
   }
-  
+
   chute.lift({
     example_main_library
   })
+  //".lift" returns the Chute function to allow chaining.
+  // The line below continues the above call into a new chute.
+  // It also makes used of a library just given to "lift",
+  // and directly calls a function in that library by name.
+  ('This saves').frequently_used_action.log('Chained ".lift"')
+
   // The chutes below belong to different function scopes.
   // Using these Chute features, they call the functions above.
 }
@@ -432,8 +442,9 @@ log(
 // It calls a function named "sentence" by its name, 
 // instead of having to call "example_main_library.sentence."
 
-const use_lifted = chute()
-  .name_of_today
+const use_lifted = chute()//Chute allows starting with no seed.
+  //In the line below, a dot-style function provides the seed.
+  .name_of_today//Chute made this non-global function reachable.
   .sentence()
   ()
 log(
@@ -456,7 +467,7 @@ log(
 // =============================================================
 // ## NAME - Give the chute function a custom name when needed.
 
-const $ = chute // This line lets a dollar sign call chute.
+const $ = chute // This line lets a dollar sign call Chute.
 
 // The next line calls the custom named chute
 let custom_named_chute = $([2,3,4])

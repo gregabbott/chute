@@ -4,6 +4,8 @@
 - JS: Improves skip void setting handler.
 - DOCS: Removes "pick" shorthand section.  ".pick(if,then)".
 - Site: Loads log from text file.
+- JS: Changes new chute setup to chute.make(settings)(seed)
+- JS: Makes "lift" & "feed" chainable & documents.
 
 # 2024_12_07.2
 - JS: Adds and documents chute end methods "._end()" or "._$()".

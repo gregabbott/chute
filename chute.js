@@ -1,6 +1,6 @@
 const chute = (()=>{
 // https://gregabbott.github.io/chute By + Copyright Greg Abbott
-// [V1=2024-11-27][V=2024-12-08.1]
+// [V1=2024-11-27][V=2024-12-08.2]
 const stringy=x=>JSON.stringify(x),
 error=(...x)=>{throw new Error(x)},
 is_fn=x=>x instanceof Function,
@@ -17,17 +17,37 @@ lift_libraries=o=>{// hoist
     CHUTE.library[k]=v
     CHUTE.lifted_libraries.push(v)
   })(o)
+  return CHUTE//allow chaining
 },
 load_feed_items=o=>{
   if(!is_object(o))error(`give .feed 1 object`)
   loop_o((k,v)=>{if(is_fn(v)||is_object(v))CHUTE.library[k]=v})
   (o)
+  return CHUTE//allow chaining
 },
 chute_lib={},//Holds a chute's methods: log, tap, do, if
-PLACEHOLDER = {},//Sets data argument position in .fn calls.
-CHUTE=(seed,...args)=>new_chute({seed,args})//Becomes chute FN
-//`chute(seed)` calls CHUTE, returns new chute setup with seed
-CHUTE.x=PLACEHOLDER//Gives user access via `(chute_fn_name).x`
+PLACEHOLDER = {},//Stands in for data as argument in .fn calls.
+CHUTE=(seed=PLACEHOLDER,...args)=>{
+  //if(seed===PLACEHOLDER)return CHUTE//require seed
+  //Allow blank seed: user may wants a dot FN to return seed
+  return new_chute({seed,args})
+}
+//a default chute 
+//^Becomes "const chute". `chute([seed,args])` makes new chute
+CHUTE.make=(...o)=>{//makes, configures and returns a new chute
+  let settings=o.length===1&&is_object(o[0])?o[0]:0
+  if(!settings)error('.with accepts 1 object for settings')
+  return new_chute({settings})
+}
+const setup_chute=({settings,a_chute})=>{//configure a chute
+  if(a_chute.with_received)error(`1 "with" per chute`)
+  a_chute.with_received=true
+  let o = settings
+  if(o.sync)load_sync_fn(o.sync,a_chute)
+  if('skip' in o)a_chute.skip_void=!!o.skip
+  if(o.path)a_chute.treat_dots_as_paths=!!o.path
+}
+CHUTE.x=PLACEHOLDER//User access via `(chute_fn_name).x`
 CHUTE.library={}//Holds Fns FEED/LIFT gave to ALL CHUTE
 CHUTE.lifted_libraries=[]//Holds libs LIFT gives to all CHUTE
 //lifted_libraries can call ".fn_name" and ".lib_name.fn_name"
@@ -38,8 +58,8 @@ chute_lib.log=({args,data})=>{
   else console.log(data)
   return data
 }
-chute_lib.do=({args,data,a_chute})=>{//[f1,f2,f3]->f3(f2(f1(x)))
-  if(args.length==0)error('give .do >0 arguments')//.log.do.log
+chute_lib.do=({args,data,a_chute})=>{//[a,b,c]->c(b(a(x)))
+  if(args.length==0)error('give .do >0 arguments')
   return args.reduce((data,arg)=>{
         if(arg==='log'){console.log(data);return data}
     else if(is_fn(arg)){a_chute.keep(arg);return arg(data)}
@@ -134,18 +154,7 @@ chute_lib.tap=({args,data})=>{
   else error('give .tap a fn to send data to')
   return data
 }
-chute_lib.with=({args,data,a_chute})=>{//configure a chute
-  if(a_chute.with_received)error(`1 "with" per chute`)
-  a_chute.with_received=true
-  let o=args.length===1&&is_object(args[0])?args[0]:0
-  if(!o)error('.with accepts 1 object for settings')
-  if(o.sync)load_sync_fn(o.sync,a_chute)
-  if('skip' in o)a_chute.skip_void=!!o.skip
-  if(o.feed)load_feed_items(o.feed)
-  if(o.lift)lift_libraries(o.lift)
-  if(o.path)a_chute.treat_dots_as_paths=!!o.path
-  return data//Leaves data unchanged
-}
+
 function load_sync_fn(o,a_chute){
   if(!is_fn(o))error(`give SYNC FN: "v=>user_variable=v"`)
   a_chute.sync_data=o
@@ -264,7 +273,7 @@ function _apply(a_chute, args){
   a_chute.dot_list.length=0//Reset : processed all call keys
   return should_end_chute?a_chute.get_data():a_chute.proxy
 }
-function new_chute({seed,args}){
+function new_chute({seed,args,settings}){
   let a_chute=blank_chute()
       a_chute.keep=make_memoizer(a_chute)
   a_chute.set_data=x=>{
@@ -273,8 +282,11 @@ function new_chute({seed,args}){
     a_chute.data=x
   }
   a_chute.get_data=()=>a_chute.data
+  if(settings){//called chute.make({settings_object})
+    setup_chute({settings,a_chute})
+  }
   if(seed)a_chute.set_data(seed)
-  if(args.length>0){
+  if(args?.length>0){
     a_chute.set_data(chute_lib.do({args,data:seed,a_chute}))
   }
   a_chute.proxy = new Proxy(()=>{},{
