@@ -170,11 +170,11 @@ function handle_nested_access(a_chute,args){
     //it deduces: .reverse|.log|index 4|.JSON.stringify(Args)
   function setup_root(key,a){
     //let o = {  }
-    let desc = `a built in chute method, `+
-    `a method of the_current_data, `+
-    `a global function, `+
+    let desc = `a built in chute method; `+
+    `a method of the_current_data; `+
     `a function passed in to this chute via a previous call, `+
-    `or Chute's .feed or .lift properties`
+    `or Chute's .feed or .lift properties;`+
+    `or a global function.`
     //console.log(`find root of "${key}"`,a.data)
     //HIERARCHICAL ORDER
     let chute_fn=chute_lib.hasOwnProperty(key)//<-non native 
