@@ -48,7 +48,7 @@ console.log({demo})//"80!"   Use value of methods & FNs sequence
 // 0 ARG STYLE OPTIONS =========================================
 //  Pipeline (deduce calls)  .reverse.JSON.stringify.log()
 //  Dot notation (explicit)  .reverse().JSON.stringify().log()
-//               Same steps  .reverse > JSON.stringify > log
+//           Both equate to  .reverse > JSON.stringify > log
 // =============================================================
 ```
 - For more information, visit [the Chute site](https://chute.pages.dev/) (also at [GitHub Pages](https://gregabbott.github.io/chute/)).
