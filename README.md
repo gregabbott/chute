@@ -15,8 +15,8 @@ const NG_index = n => l => l[n]
 // Chutes access globals and same-scope items without setup.
 chute// Optional setup lets all chutes access non-global items.
 .feed({// Feed gives all chutes access to functions & libraries:
-  append:NG_append,// This line provides a function. [^0]
-  times:object_of_fns,// This line gives a library of FNs [^1].
+  append: NG_append,// This line provides a function. [^0]
+  times: object_of_fns,// This line gives a library of FNs [^1].
   // The line also sets a custom name to access the library by.
 }).lift({// Lift lets all chutes call library functions by name.
   NG_sum// This line gives an object of functions to lift [^2].
