@@ -21,7 +21,7 @@ chute// Optional setup lets all chutes access non-global items.
 }).lift({// Lift lets all chutes call library functions by name.
   NG_sum// This line gives an object of functions to lift [^2].
 })//Any chute anywhere in a project can now access these items.
-// ==========================================================
+// =============================================================
 /* KEY:[FN=Function][NG=Non-global] */  const demo = /* Value:
     Start a chute with a seed value */  chute(7)     /* 7
           Call any global functions */ .add_one      /* 8
