@@ -161,7 +161,7 @@ a, a *{
 .column{
   width: 70ch;/*64 + padding + space to stop unwanted wrapping*/
   max-width: 100dvw;
-  padding: 4ch 0ch;/*2ch LR if no details*/
+  padding: 4ch 2ch;/*2ch LR if no details*/
   margin: 0 auto;
   display: block;
 }

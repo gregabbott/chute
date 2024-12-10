@@ -17,40 +17,36 @@ lift_libraries=o=>{// hoist
     CHUTE.library[k]=v
     CHUTE.lifted_libraries.push(v)
   })(o)
-  return CHUTE//allow chaining
+  return CHUTE
 },
 load_feed_items=o=>{
   if(!is_object(o))error(`give .feed 1 object`)
   loop_o((k,v)=>{if(is_fn(v)||is_object(v))CHUTE.library[k]=v})
   (o)
-  return CHUTE//allow chaining
+  return CHUTE
 },
-chute_lib={},//Holds a chute's methods: log, tap, do, if
-PLACEHOLDER = {},//Stands in for data as argument in .fn calls.
+chute_lib={},//Holds: log, tap, do, if
+PLACEHOLDER = {},//Stands in for data in .fn call arguments
 CHUTE=(seed=PLACEHOLDER,...args)=>{
-  //if(seed===PLACEHOLDER)return CHUTE//require seed
-  //Allow blank seed: user may wants a dot FN to return seed
-  return new_chute({seed,args})
-}
-//a default chute 
-//^Becomes "const chute". `chute([seed,args])` makes new chute
-CHUTE.make=(...o)=>{//makes, configures and returns a new chute
+  //To require seed use: if(seed===PLACEHOLDER)return CHUTE
+  //Allow blank start so user may call a dot FN to get seed
+  return new_chute({seed,args})//Default chute
+}//^Becomes "const chute". `chute([seed,args])` makes new chute
+CHUTE.make=(...o)=>{
   let settings=o.length===1&&is_object(o[0])?o[0]:0
-  if(!settings)error('.with accepts 1 object for settings')
-  return new_chute({settings})
+  if(!settings)error('Make takes 1 object for settings')
+  return new_chute({settings})//Custom chute
 }
-const setup_chute=({settings,a_chute})=>{//configure a chute
-  if(a_chute.with_received)error(`1 "with" per chute`)
-  a_chute.with_received=true
+const setup_chute=({settings,a_chute})=>{
   let o = settings
   if(o.sync)load_sync_fn(o.sync,a_chute)
   if('skip' in o)a_chute.skip_void=!!o.skip
   if(o.path)a_chute.treat_dots_as_paths=!!o.path
 }
-CHUTE.x=PLACEHOLDER//User access via `(chute_fn_name).x`
-CHUTE.library={}//Holds Fns FEED/LIFT gave to ALL CHUTE
-CHUTE.lifted_libraries=[]//Holds libs LIFT gives to all CHUTE
-//lifted_libraries can call ".fn_name" and ".lib_name.fn_name"
+CHUTE.x=PLACEHOLDER//Gives user access
+CHUTE.library={}//Holds Fns that FEED/LIFT give to all chutes
+CHUTE.lifted_libraries=[]//Holds libs LIFT gives to all chutes
+//lifted_libraries can call ".fn_name" & ".lib_name.fn_name"
 CHUTE.lift=lift_libraries
 CHUTE.feed=load_feed_items
 chute_lib.log=({args,data})=>{
@@ -77,8 +73,8 @@ const call_a_function=({fn,data,args})=>{
   let processed_args=swap_placeholders(args,data)
   let had_placeholder=processed_args!==args
   if(had_placeholder)return fn(...processed_args)
-  // Arguments lack placeholder for data
-  else return fn(...args)(data)//Expect a Fn to provide data.
+  // Because arguments lack placeholder for data:
+  else return fn(...args)(data)//Expect a Fn to provide data to.
 }
 const swap_placeholders=(args,data)=>{
   let must_swap=args.length>0&&args.includes(PLACEHOLDER)
@@ -129,7 +125,7 @@ const process_condition_block=(c,data,a_chute)=>{
 chute_lib.pick=({args,data,a_chute})=>{
   if(args.length==0)error('.if needs 1-2 arguments')
   let conditions_block=
-     args.length===2?{if:args}//reshape as if-else object
+     args.length===2?{if:args}//reshape into an if-else object
     :args.length===1?args[0]
     :false
   if(is_condition_block(conditions_block)){
@@ -175,7 +171,7 @@ function handle_nested_access(a_chute,args){
     `or Chute's .feed or .lift properties;`+
     `or a global function.`
     //console.log(`find root of "${key}"`,a.data)
-    //HIERARCHICAL ORDER
+    //ORDERED BY RANK (local to far)
     let chute_fn=chute_lib.hasOwnProperty(key)//<-non native 
       if(chute_fn)return ['chute_lib',chute_lib]
     let seeded_chute=a.data!==null&&a.data[key]!==undefined
@@ -194,7 +190,7 @@ function handle_nested_access(a_chute,args){
            |       |      |
          root   context  Fn*/
   let path_mode=a_chute.treat_dots_as_paths
-  //^ if dot_list==[a.b.c] path_mode expects a[b][c] vs a|>b|>c
+  //^ if dot_list==[a,b,c] path_mode expects a[b][c](). !a|>b|>c
   return dot_list.reduce((a,key,i,l)=>{
     if(!a.path){
       ([a.root_string,a.root]=setup_root(key,a))
@@ -209,7 +205,7 @@ function handle_nested_access(a_chute,args){
     let found_last_in_current_path=a.path[next_key]===undefined
     if(found_last_in_current_path){
       if(path_mode)error(`"${key}" lacks "${next_key}"`)
-      //^ E.G. ".reverse.log()". path_mode?FAIL:reverse().log()
+      //^ EG key==".a.b()"&&!a[b]&&path_mode?FAIL^:CHAIN b(a(x))
       //console.log(`run "${key}"`)
       a.data = try_do({fn:a.path,key,a})//not last key so 0 args
       //^ Data forms input for next FN && not saved to chute yet
@@ -222,7 +218,7 @@ function handle_nested_access(a_chute,args){
   function try_do({fn,key,a,args=[]}){
     //console.log(`RUN ${a.root_string}'s '"${key}"`)
     // Dot-style-calls use functions Chute can access already:
-    // no need to memoize fn, but inspect the arguments for fns
+    // no need to memoize fn but do inspect their args for fns
     if(!is_fn(a.path))error(`${a.root_string}…"${key}" not ƒ`)
     let rv
     if(a.root==chute_lib)rv=fn({args,data:a.data,a_chute})
@@ -245,15 +241,12 @@ function handle_nested_access(a_chute,args){
 const blank_chute=()=>({
   data:null,
   fns_seen: {},//non-global named fns encountered memoized
-  with_received:false,
   treat_dots_as_paths:false,//.log.reverse vs .log().reverse()
-  sync_data:null,//Receives `x=>user_variable=x` to send data
+  sync_data:null,//Accepts `x=>user_variable=x` to send data
   skip_void:true,//Default
-  dot_list:[],//^.a.b.c collected until '()'
+  dot_list:[],//^.a.b.c collected until '()' given
 })
-function _get(a_chute,key){
-  a_chute.dot_list.push(key)//store all keys pre '()' apply
-}
+function _get(a_chute,key){a_chute.dot_list.push(key)}
 function _apply(a_chute, args){
   let named_end_chute=['_end','_$']
     .includes(a_chute.dot_list.at(-1))
