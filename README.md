@@ -51,7 +51,9 @@ chute// Optional setup lets all chutes access non-global items.
 //           Both equate to  .reverse > JSON.stringify > log
 // =============================================================
 ```
-- For more information, visit [the Chute site](https://chute.pages.dev/) (also at [GitHub Pages](https://gregabbott.github.io/chute/)).
+- For more information, visit:
+  - https://gregabbott.pages.dev/chute
+  - https://gregabbott.github.io/chute
 - Support Chute via:
   - [Buy me a coffee](https://buymeacoffee.com/gregabbott)
   - [Kofi](https://ko-fi.com/gregabbott)
