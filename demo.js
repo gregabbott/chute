@@ -74,7 +74,7 @@ const chute_1a_result = chute(// Call Chute to make a new chute.
 // Any dot-style calls may have parentheses when wanted,
 // and one nameless call may always follow another.
 // =============================================================
-// ## Memoising Non-Global Functions
+// ## Memoise Non-Global Functions
 // When a chute receives a named non-global function,
 // it makes it available to dot-style call until the chute ends.
 .non_global_unary()
@@ -254,7 +254,7 @@ const current_value_token_chute = chute.make({
 ({two:2,four:4,eight:8})// It begins with a seed value as usual.
 // All of the calls below make use of the current value token.
 // The token allows for:
-(x.eight) // PROPERTY ACCESSS   vs. "(x=>x.eight)"
+(x.eight) // PROPERTY ACCESS   vs. "(x=>x.eight)"
 (x + 10)// ARITHMETIC           vs. "(x=>x+10)"
 ({data:x})// OBJECT LITERALS    vs. "(x=>{data:x})"
 (`Answer is "${x.data}"`)// TEMPLATE LITERALS
@@ -355,9 +355,9 @@ log({current_value_token_chute})
   // The object takes non-global functions and libraries,
   // and makes them available for dot-style calls in all chutes.
 
-  // To demonstrate, some psuedo functions and libraries follow:
+  // To demonstrate, some pseudo functions and libraries follow:
   const name_of_today=()=>
-    ['Sunday','Monday','Tueday','Wednesday',
+    ['Sunday','Monday','Tuesday','Wednesday',
      'Thursday','Friday','Saturday']
     [new Date().getDay()]
   const really_long_name_library = {
@@ -479,7 +479,6 @@ let custom_named_chute = $([2,3,4])
 log({custom_named_chute})
 
 // # Helper function used for the demo
-function return_falsey(){return 0}
 function placeholder_test(a,x){log(a,x);return x}
 function extract_quoted(x){return x.replace(/.*?"(.*?)"/,`$1`)}
 function get_index(i){return data => data[i]}
