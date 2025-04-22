@@ -1,5 +1,6 @@
 const chute = (()=>{
-// https://gregabbott.github.io/chute By + Copyright Greg Abbott
+// https://gregabbott.github.io/chute
+// By + Copyright 2024-2025 Greg Abbott
 // [V1=2024-11-27][V=2024-12-08.2]
 const stringy=x=>JSON.stringify(x),
 error=(...x)=>{throw new Error(x)},
