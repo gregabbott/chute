@@ -4,8 +4,8 @@ textarea{
 }
 :root{
 	color-scheme: light dark;
-  --light: hsl(60, 25%, 95%);
-  --dark:hsl(15, 5%, 10%);
+  --light: #f5f3ed;
+  --dark:#151515;
 	--base_x1:1ch;
   --half_base_x1:.5ch;
 	--bg:light-dark(var(--light),var(--dark));
@@ -70,8 +70,9 @@ footer {
     border: 1px dashed var(--fg);
   }
   *{
-    font-size: small;
+    font-size: 10px;
   }
+  font-size: 10px;
 }
 .hljs_block{
   width: 100%;

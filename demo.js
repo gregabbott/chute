@@ -26,7 +26,7 @@ const chute_1a_result = chute(// Call Chute to make a new chute.
 // and keeps the returned value for any next step in a chute.
 // ------------------------------------------------------------
 // ### Dot-style Unary
-// To call an unary, a function that takes a single argument,
+// To call a unary, a function that takes a single argument,
 // name the function in the dot-style, and provide no arguments.
 // Chute will send the function the current data as argument 1.
 .wrap_in_array // Unary calls may omit or include parentheses.
@@ -336,7 +336,7 @@ log({current_value_token_chute})
   // The example below shows how to enable the "path" setting.
   let treat_dots_as_path = chute.make({path:true})
   (["a","b","c"])
-  // With this setting on, and no parentheses on the next line,
+  // With this setting on, and no parentheses after LOG,
   // Chute wouldn't call LOG, but would expect LOG to hold MAP.
   .log()
   .map((x,i)=>x+i)
@@ -463,7 +463,7 @@ log(
   // A named non-global function (given earlier in the chute).
   // A function given to Chute's .feed or .lift methods.
   // A global function.
-// The script logic accounts for nested calls.
+// The script logic accounts for nested calls to Chute.
 // =============================================================
 // ## NAME - Give the chute function a custom name when needed.
 
