@@ -29,7 +29,7 @@ as well as namelessly later `chute(data).map(mapFn)/*.do*/(f1,f2)`.
 
 Beyond this, Chute has other features
 including an optional simple setup step
-for making it even easier to use Chute throughout a project.
+to simplify using Chute throughout a project.
 For example, 
 Chute can optionally hoist a library of functions
 to make each function callable directly by name,
