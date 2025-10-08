@@ -1,22 +1,68 @@
 # Chute
-Chute works like a pipeline operator for sending data through functions and methods in a dot-notation style.
+Chute works like a pipeline operator for sending data through a chained mix of functions and methods in a dot-notation style.
+
+Without any setup steps,
+Chute can alternate between calling any native or custom methods the current data has, 
+and sending the current data through any functions: 
+whether global-scope or local-scope, 
+top level or deeply nested, 
+made for chaining or not. 
+Chute works with unary (`chute(data).unaryFn1().unaryFn2()…`),
+curried (`chute(data).curriedFn1(args).currentF1(args)…`)) 
+and non-unary functions. 
+Chute can send the current data through non-unary functions
+at any specific argument position 
+by using its optional custom-namable placeholder variable 
+(e.g `X` -> `chute(data).nonUnaryFn(arg1,X,arg3)`). 
+Chute also allows one-off inline functions and sub-chains 
+at any point in a chute
+(`chute(data).do(f1,data=>{inline_fn},f3)`).
+
+Chute offers an optional terser writing style, 
+where it can
+call unary methods without parentheses
+(`chute(data).f1.f2.f3.someLib.f4InSomeLib.f5`), 
+and call its `.do` sub-chain method when first calling Chute 
+`chute(do,f1,f2)`
+as well as namelessly later `chute(data)…/*.do*/(f1,f2)`.
+
+Beyond this, Chute has other features
+including an optional simple setup step
+for making it even easier to use Chute throughout a project.
+For example, 
+Chute can optionally hoist a library of functions
+to make them callable directly by name,
+instead of by path
+(e.g. instead of `chute(data).globalLibraryName.pathToFn.fnName`
+call `chute(data).fnName()`).
+
+For a quick usage demo, see below. For more information about Chute, visit:
+  - https://gregabbott.pages.dev/chute
+  - https://gregabbott.github.io/chute
+
 ```js
 // .js ~10KB | .min.js ~4KB | MIT License | Vanilla JS 
 // =============================================================
-// The demo below uses these example functions
+// The demo further below will call these example dummy functions:
 function add_one(x) { return x + 1 }
 function add(b) { return a => a + b }
 function a_in_b(a, b) { console.log(b.includes(a)); return a }
 const put_in_array = x => [x] 
 const get_index = n => l => l[n]
-const X = chute.x // Chute has a placeholder feature, used below
-// DEMO 1
+// Chute also works with non-unary and non-curried functions.
+//   It has an optional placeholder variable for this purpose.
+//   You can give the optional placeholder a custom name:
+//   Use it to give current data as a specific argument.
+const X = chute.x // Here we name the placeholder `X`
+
+// DEMO 1 - Chute (without any setup steps)
 let demo_1 = chute(7)// start a new chute with any seed value
 .toString// call methods of the current data. (parens optional)
 .parseInt// send data through global native functions
-.add_one// global unary
-.add(8)// global curried
-.a_in_b(X,[8,16])// global other (X sends data as argument 1)
+.add_one// call a global unary function
+.add(8)// call a global curried function
+.a_in_b(X,[8,16])// call a global non-unary function
+//The X placeholder above sends the current data as argument 1)
 .do(put_in_array)// send data through local non-global functions
 .put_in_array// dot-call non-globals called earlier in a chute
 .JSON.stringify// call global nested functions: native or custom
@@ -32,14 +78,14 @@ console.log(demo_1)// 16
 {
   // The demo below uses these non-global functions & libraries
   const append = b => a => a + b
-  const badly_named_ob = { two: x => x * 2, three: x => x * 3 }
+  const library_of_fns = { two: x => x * 2, three: x => x * 3 }
   const sum = { add : b => a => a + b, minus: b => a => a - b }
 
   // DEMO 2
   chute// Optional setup lets all chutes access non-globals.
   .feed({// Give all chutes access to functions and libraries:
     append,// This line gives a function 
-    times: badly_named_ob,// This line gives & renames a library
+    times: library_of_fns,// This line gives & renames a library
   })
   .lift({// Give all chutes access to library functions by name:
     sum
@@ -63,9 +109,7 @@ MORE FEATURES
           Both equate to  .reverse > JSON.stringify > log
 ============================================================= */
 ```
-- For more information, visit:
-  - https://gregabbott.pages.dev/chute
-  - https://gregabbott.github.io/chute
+
 - Support Chute via:
   - [Buy me a coffee](https://buymeacoffee.com/gregabbott)
   - [Kofi](https://ko-fi.com/gregabbott)
