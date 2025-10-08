@@ -23,7 +23,7 @@ Chute offers an optional terser writing style,
 where it can
 call unary methods without parentheses
 (`chute(data).f1.f2.f3.someLib.f4InSomeLib.f5`), 
-and call its `.do` sub-chain method when first calling Chute 
+and call its `.do` sub-chain method when starting a new chute 
 `chute(data,f1,f2)`
 as well as namelessly later `chute(data).map(mapFn)/*.do*/(f1,f2)`.
 
