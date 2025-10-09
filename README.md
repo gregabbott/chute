@@ -1,5 +1,5 @@
 # Chute
-Chute works like a pipeline operator to chain and send data through a mix of functions and methods using a dot-notation style.
+Written as a vanilla JavaScript function, Chute works like a pipeline operator to chain and send data through a mix of functions and methods using a dot-notation style.
 
 Without any setup steps,
 Chute can alternate between calling any native or custom methods the current data has, 
