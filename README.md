@@ -44,7 +44,7 @@ For a quick usage demo, see further below. For more information about Chute, vis
 ```js
 // .js ~10KB | .min.js ~4KB | MIT License | Vanilla JS 
 // =============================================================
-// The demo lower down will call these example dummy functions:
+// The demo below will call these example dummy functions:
 function add_one(x) { return x + 1 }
 function add(b) { return a => a + b }
 function a_in_b(a, b) { console.log(b.includes(a)); return a }
