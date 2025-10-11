@@ -1,6 +1,11 @@
 # Chute
 Written as a vanilla JavaScript function, Chute works like a pipeline operator to chain and send data through a mix of functions and methods using a dot-notation style.
 
+- [Overview](#overview)
+- [Demo](#demo)
+- [Links](#links)
+
+# Overview
 Without any setup steps,
 Chute can alternate between calling any native or custom methods the current data has, 
 and sending the current data through any functions: 
@@ -37,10 +42,13 @@ instead of by path
 (e.g. instead of `chute(data).globalLibraryName.pathToFn.fnName`
 call `chute(data).fnName()`).
 
-For a quick usage demo, see further below. For more information about Chute, visit:
-  - https://gregabbott.pages.dev/chute
-  - https://gregabbott.github.io/chute
+# Links
+For more information visit the Chute site:
 
+- https://gregabbott.pages.dev/chute
+- https://gregabbott.github.io/chute
+
+# Demo
 ```js
 // .js ~10KB | .min.js ~4KB | MIT License | Vanilla JS 
 // =============================================================
