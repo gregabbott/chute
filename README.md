@@ -119,7 +119,3 @@ MORE FEATURES
           Both equate to  .reverse > JSON.stringify > log
 ============================================================= */
 ```
-
-- Support Chute via:
-  - [Buy me a coffee](https://buymeacoffee.com/gregabbott)
-  - [Kofi](https://ko-fi.com/gregabbott)
