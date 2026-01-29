@@ -16,7 +16,7 @@ made for chaining or not.
 
 Chute works with a mix of functions and methods styles:
 - **Unary**. (`chute(data).unaryFn1().unaryFn2()…`)
-- **Curried**. (`chute(data).curriedFn1(args).currentF1(args)…`)) 
+- **Curried**. (`chute(data).curriedFn1({config}).currentF1(args)…`)) 
 - **Non-unary**. For non-unary functions, Chute can send the current data
 at any specific argument position 
 (`chute(data).nonUnaryFn(arg1,chute.x/*current_data*/,arg3)`)
