@@ -1,5 +1,5 @@
 # Chute
-Use dot-notation as pipeline operator in vanilla Javascript.
+Use dot-notation as a pipeline operator in JavaScript with Chute.
 This function chains and sends data through any mix of normal functions and methods.
 
 - [Overview](#overview)
@@ -22,17 +22,17 @@ at any specific argument position
 (`chute(data).nonUnaryFn(arg1,chute.x/*current_data*/,arg3)`)
 by using its custom-namable placeholder variable 
 (`const X = chute.x`). 
-- **Inline**. Chute also allows sub-chains and one-off inline functions
+- **Inline**. Chute allows sub-chains and one-off inline functions
 at any step in a chute
 (`chute(data).do(/*subchain*/f1,/*inlineFn*/data=>{…},f3)`).
 
-Chute offers an optional terser writing style 
+Chute also offers an optional terser writing style, 
 where it can:
-- call unary methods without parentheses
+- Call unary methods without parentheses
 (`chute(data).f1.f2.f3.someLib.f4InSomeLib.f5`);
-- start a sub-chain in the initial call to Chute
+- Start a sub-chain in the initial call to Chute
 `chute(data,f1,f2)`;
-- start a sub-chain with any nameless call:
+- Start a sub-chain with any nameless call:
 `chute(data).map(mapFn)/*.do*/(f1,f2)`.
 
 Beyond this, Chute has other features
