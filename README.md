@@ -1,6 +1,6 @@
 # Chute
 Use dot-notation as a pipeline operator in JavaScript with Chute.
-This function chains and sends data through any mix of normal functions and methods.
+A function to chain and send data through any mix of normal functions and methods.
 
 - [Overview](#overview)
 - [Demo](#demo)
