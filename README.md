@@ -1,5 +1,6 @@
 # Chute
-Written as a vanilla JavaScript function, Chute works like a pipeline operator to chain and send data through a mix of functions and methods using a dot-notation style.
+Use dot-notation as pipeline operator in vanilla Javascript.
+This function chains and sends data through any mix of normal functions and methods.
 
 - [Overview](#overview)
 - [Demo](#demo)
@@ -7,30 +8,32 @@ Written as a vanilla JavaScript function, Chute works like a pipeline operator t
 
 # Overview
 Without any setup steps,
-Chute can alternate between calling any native or custom methods the current data has, 
-and sending the current data through any functions: 
+Chute can alternate between calling methods and functions.
+It can call any native or custom methods the current data has, 
+and send the current data through any functions: 
 whether global-scope or local-scope, 
 top level or deeply nested, 
 made for chaining or not. 
-Chute works with unary (`chute(data).unaryFn1().unaryFn2()…`),
-curried (`chute(data).curriedFn1(args).currentF1(args)…`)) 
-and non-unary functions. 
-Chute can send the current data through non-unary functions
+
+Chute works with a mix of functions and methods styles:
+- **Unary**. (`chute(data).unaryFn1().unaryFn2()…`)
+- **Curried**. (`chute(data).curriedFn1(args).currentF1(args)…`)) 
+- **Non-unary**. For non-unary functions, Chute can send the current data
 at any specific argument position 
 (`chute(data).nonUnaryFn(arg1,chute.x/*current_data*/,arg3)`)
 by using its custom-namable placeholder variable 
 (`const X = chute.x`). 
-Chute also allows sub-chains and one-off inline functions
+- **Inline**. Chute also allows sub-chains and one-off inline functions
 at any step in a chute
 (`chute(data).do(/*subchain*/f1,/*inlineFn*/data=>{…},f3)`).
 
 Chute offers an optional terser writing style 
 where it can:
-call unary methods without parentheses
+- call unary methods without parentheses
 (`chute(data).f1.f2.f3.someLib.f4InSomeLib.f5`);
-start a sub-chain in the initial call to the function
+- start a sub-chain in the initial call to Chute
 `chute(data,f1,f2)`;
-and automatically start a sub-chain with any nameless call:
+- start a sub-chain with any nameless call:
 `chute(data).map(mapFn)/*.do*/(f1,f2)`.
 
 Beyond this, Chute has other features
@@ -40,8 +43,8 @@ For example,
 Chute can optionally hoist a library of functions
 to make each function callable directly by name,
 instead of by path
-(e.g. instead of `chute(data).globalLibraryName.pathToFn.fnName`
-call `chute(data).fnName()`).
+(e.g. turning `chute(data).globalLibraryName.pathToFn.fnName`
+into `chute(data).fnName()`).
 
 # Links
 For more information visit the Chute site:
