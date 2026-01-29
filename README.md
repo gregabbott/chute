@@ -8,9 +8,8 @@ This function chains and sends data through any mix of normal functions and meth
 
 # Overview
 Without any setup steps,
-Chute can alternate between calling methods and functions.
-It can call any native or custom methods the current data has, 
-and send the current data through any functions: 
+Chute can alternate between calling any native or custom methods the current data has, 
+and sending the current data through any functions: 
 whether global-scope or local-scope, 
 top level or deeply nested, 
 made for chaining or not. 
