@@ -24,13 +24,14 @@ Chute also allows sub-chains and one-off inline functions
 at any step in a chute
 (`chute(data).do(/*subchain*/f1,/*inlineFn*/data=>{…},f3)`).
 
-Chute offers an optional terser writing style, 
-where it can
+Chute offers an optional terser writing style 
+where it can:
 call unary methods without parentheses
-(`chute(data).f1.f2.f3.someLib.f4InSomeLib.f5`), 
-and call its `.do` sub-chain method when starting a new chute 
-`chute(data,f1,f2)`
-as well as namelessly later `chute(data).map(mapFn)/*.do*/(f1,f2)`.
+(`chute(data).f1.f2.f3.someLib.f4InSomeLib.f5`);
+start a sub-chain in the initial call to the function
+`chute(data,f1,f2)`;
+and automatically start a sub-chain with any nameless call:
+`chute(data).map(mapFn)/*.do*/(f1,f2)`.
 
 Beyond this, Chute has other features
 including an optional simple setup step
